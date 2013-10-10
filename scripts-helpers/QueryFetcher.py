@@ -1,3 +1,5 @@
+import re
+
 queryBoundary = "-NEXT-"
 keySeparator = "||||"
 f = open('queries.txt', 'r')
@@ -16,6 +18,10 @@ for query in f:
     queries[entry[0]] = entry[1]
 
 
-def get_query(name):
-    return queries[name]
+def get_query(name, param=""):
+
+    if param == "":
+        return queries[name]
+
+    return re.sub("(\{\{DISTANCE\}\})", str(param), queries[name])
 

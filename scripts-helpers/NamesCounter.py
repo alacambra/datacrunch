@@ -41,8 +41,8 @@ class NamesCounter:
             names_[entry[0]] = entry[1]
 
         s = re.sub(path_id_regex, map_replace, paths)
-        print self.get_final_points(s.split("\n"))
-        return
+        #print self.get_final_points(s.split("\n"))
+        return s
 
 def map_replace(matchobj):
     return "(" + names_[matchobj.group(1)] + ")";

@@ -86,5 +86,3 @@ class NodeGroup:
         names = self.childs
         names.append(self.parent)
         return names
-
-#CypherCreator().create_query();
