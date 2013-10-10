@@ -1,0 +1,19 @@
+basic||||
+
+START n=node(*)
+MATCH p=n-[r:R*1..2]->o
+WITH p, reduce(a=0, b IN r| a+b.w) AS total_weigth, length(p) AS dist
+RETURN p, dist, total_weigth, total_weigth / dist AS relative_weigth
+ORDER BY relative_weigth DESC, dist
+
+-NEXT-
+remove_all||||
+START n=node(*)
+MATCH n-[r?]-m
+WITH n, r
+DELETE n, r
+
+-NEXT-
+get_all||||
+START n=node(*)
+return n;
