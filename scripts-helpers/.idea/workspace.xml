@@ -26,7 +26,7 @@
       <file leaf-file-name="NamesCounter.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/NamesCounter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="27" column="0" selection-start="745" selection-end="745" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="855">
+            <state line="27" column="0" selection-start="745" selection-end="745" vertical-scroll-proportion="0.0" vertical-offset="405" max-vertical-offset="870">
               <folding />
             </state>
           </provider>
@@ -35,10 +35,8 @@
       <file leaf-file-name="db-manager.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/db-manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="38" selection-start="394" selection-end="394" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="540">
-              <folding>
-                <element signature="e#0#24#0" expanded="true" />
-              </folding>
+            <state line="17" column="38" selection-start="394" selection-end="394" vertical-scroll-proportion="0.0" vertical-offset="255" max-vertical-offset="540">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -46,7 +44,7 @@
       <file leaf-file-name="CypherCreator.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CypherCreator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="47" column="20" selection-start="1202" selection-end="1214" vertical-scroll-proportion="0.0" vertical-offset="45" max-vertical-offset="1395">
+            <state line="47" column="20" selection-start="1202" selection-end="1214" vertical-scroll-proportion="0.0" vertical-offset="705" max-vertical-offset="1425">
               <folding />
             </state>
           </provider>
@@ -55,7 +53,7 @@
       <file leaf-file-name="sch.in" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/sch.in">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="4" column="28" selection-start="153" selection-end="154" vertical-scroll-proportion="0.052401748" vertical-offset="0" max-vertical-offset="1145">
+            <state line="4" column="44" selection-start="170" selection-end="170" vertical-scroll-proportion="0.035005834" vertical-offset="0" max-vertical-offset="1714">
               <folding />
             </state>
           </provider>
@@ -64,7 +62,7 @@
       <file leaf-file-name="queries.txt" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/queries.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="10" selection-start="234" selection-end="244" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="360">
+            <state line="9" column="10" selection-start="234" selection-end="244" vertical-scroll-proportion="0.0" vertical-offset="135" max-vertical-offset="360">
               <folding />
             </state>
           </provider>
@@ -78,7 +76,7 @@
     </FindUsagesManager>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$USER_HOME$/git/datacrunch" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="GitLogSettings">
     <option name="myDateState">
@@ -106,10 +104,9 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1918" />
-    <option name="y" value="-3" />
-    <option name="width" value="1204" />
-    <option name="height" value="1892" />
+    <option name="x" value="1920" />
+    <option name="width" value="1198" />
+    <option name="height" value="1885" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -162,12 +159,12 @@
   </component>
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
-    <property name="recentsLimit" value="5" />
     <property name="options.lastSelected" value="project.propVCSSupport.Mappings" />
-    <property name="last_opened_file_path" value="$USER_HOME$/git/datacrunch" />
+    <property name="recentsLimit" value="5" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
     <property name="FullScreen" value="false" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -396,23 +393,23 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1918" y="-3" width="1204" height="1892" extended-state="6" />
+    <frame x="1920" y="0" width="1198" height="1885" extended-state="4" />
     <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32951945" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32951945" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24808836" sideWeight="0.67048055" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24765158" sideWeight="0.67048055" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3993135" sideWeight="0.4995752" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3993135" sideWeight="0.5004248" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32951945" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32899207" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32951945" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3998856" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -432,6 +429,13 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/queries.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="10" selection-start="234" selection-end="244" vertical-scroll-proportion="0.0" vertical-offset="135" max-vertical-offset="360">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/results-sub.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state line="10" column="52" selection-start="1872" selection-end="1872" vertical-scroll-proportion="-0.007067138" vertical-offset="158" max-vertical-offset="1335" />
@@ -439,9 +443,7 @@
     </entry>
     <entry file="file:///usr/local/lib/python2.7/dist-packages/py2neo/cypher.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="43" column="31" selection-start="1150" selection-end="1168" vertical-scroll-proportion="0.507569" vertical-offset="0" max-vertical-offset="1560">
-          <folding />
-        </state>
+        <state line="43" column="31" selection-start="1150" selection-end="1168" vertical-scroll-proportion="0.507569" vertical-offset="0" max-vertical-offset="1560" />
       </provider>
     </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd_breakpoints.py">
@@ -463,16 +465,12 @@
     </entry>
     <entry file="file:///usr/lib/python2.7/re.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="186" column="0" selection-start="8877" selection-end="8877" vertical-scroll-proportion="0.0" vertical-offset="2149" max-vertical-offset="4920">
-          <folding />
-        </state>
+        <state line="186" column="0" selection-start="8877" selection-end="8877" vertical-scroll-proportion="0.0" vertical-offset="2149" max-vertical-offset="4920" />
       </provider>
     </entry>
     <entry file="file:///usr/local/lib/python2.7/dist-packages/py2neo/neo4j.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="976" column="8" selection-start="34351" selection-end="34351" vertical-scroll-proportion="0.33303887" vertical-offset="13948" max-vertical-offset="46155">
-          <folding />
-        </state>
+        <state line="976" column="8" selection-start="34351" selection-end="34351" vertical-scroll-proportion="0.33303887" vertical-offset="13948" max-vertical-offset="46155" />
       </provider>
     </entry>
     <entry file="file:///usr/local/lib/python2.7/dist-packages/py2neo/tool.py">
@@ -484,18 +482,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tool2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="72" column="15" selection-start="2508" selection-end="2508" vertical-scroll-proportion="-1.1091703" vertical-offset="2350" max-vertical-offset="6555">
-          <folding>
-            <element signature="e#683#722#0" expanded="false" />
-          </folding>
-        </state>
+        <state line="72" column="15" selection-start="2508" selection-end="2508" vertical-scroll-proportion="-1.1091703" vertical-offset="2350" max-vertical-offset="6555" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/QueryFetcher.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="0" selection-start="335" selection-end="335" vertical-scroll-proportion="0.2489083" vertical-offset="0" max-vertical-offset="1145">
-          <folding />
-        </state>
+        <state line="19" column="0" selection-start="335" selection-end="335" vertical-scroll-proportion="0.2489083" vertical-offset="0" max-vertical-offset="1145" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/queries.txt">
@@ -522,15 +514,13 @@
     <entry file="file://$PROJECT_DIR$/db-manager.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="17" column="38" selection-start="394" selection-end="394" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="540">
-          <folding>
-            <element signature="e#0#24#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/sch.in">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="28" selection-start="153" selection-end="154" vertical-scroll-proportion="0.052401748" vertical-offset="0" max-vertical-offset="1145">
+        <state line="4" column="44" selection-start="170" selection-end="170" vertical-scroll-proportion="0.035005834" vertical-offset="0" max-vertical-offset="1714">
           <folding />
         </state>
       </provider>
