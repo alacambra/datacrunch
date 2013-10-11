@@ -7,7 +7,6 @@ RETURN p, dist, total_weigth, total_weigth / dist AS relative_weigth
 ORDER BY relative_weigth DESC, dist
 
 -NEXT-
-
 remove_all||||
 
 START n=node(*)

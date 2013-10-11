@@ -6,6 +6,8 @@ import CypherCreator as qc
 import QueryFetcher as qf
 import NamesCounter as nc
 import re
+from numpy import matrix
+from numpy import linalg
 
 
 uri = "http://marceli:7474/db/data";
@@ -13,6 +15,7 @@ graph_db = neo4j.GraphDatabaseService(uri);
 
 
 def cypher(query):
+    print query
     return neo4j.CypherQuery(graph_db, query).execute()
 
 #cypher(qf.get_query("remove_all"))
@@ -21,11 +24,11 @@ def cypher(query):
 
 def rel_weight():
     paths = cypher(qf.get_query("basic"))
-    all = cypher(qf.get_query("get_all"))
+    all_nodes = cypher(qf.get_query("get_all"))
 
     f = open("temp", "a+")
     writer = tool.ResultWriter(f)
-    writer.write("text", all)
+    writer.write("text", all_nodes)
     writer.write("text", paths)
     f.seek(0)
     lines = f.read()
@@ -35,8 +38,8 @@ def rel_weight():
     os.remove("temp")
 
 
-def dist_matrix(distance):
-    paths = cypher(qf.get_query("distance", 1))
+def dist_matrix_(distance):
+    paths = cypher(qf.get_query("distance", distance))
 
     f = open("temp", "a+")
     writer = tool.ResultWriter(f)
@@ -45,9 +48,8 @@ def dist_matrix(distance):
     f.seek(0)
     lines = f.read().split("\n")
 
-    path_id_regex = "\(([\d]+)\)-\[:"R"\]->\(([\d]+)\)\s\|\s(\d+)"
-    regex = re.compile("\(([\d]+)\)-\[:\"R\"\]->\(([\d]+)\)\s\|\s(\d+)")
-    m1 = {}
+    regex = re.compile("\((\d+)\).+\((\d+)\) \| (\d+)")
+    matrix_ = {}
 
     for line in lines:
         l = regex.findall(line)
@@ -55,31 +57,96 @@ def dist_matrix(distance):
         if len(l) == 0:
             continue
 
-        r = int(l[0][0])
-        c = int(l[0][1])
+        assign_values_to_diagonal_matrix(l, matrix_, 0, 1)
+        assign_values_to_diagonal_matrix(l, matrix_, 1, 0)
 
-        if r == c:
-            continue
-
-        w = int(l[0][2])
-
-        if not m1.has_key(r):
-            m1[r] = {}
-
-        if not m1[r].has_key(c):
-            m1[r][c] = 0
-
-        m1[r][c] += w
-
-    print m1
-
-
-    s = ""
-
-    for r, c in m1.iteritems():
-        s += str(r) + "|"
+    print_matrix(matrix_)
 
     f.close()
     os.remove("temp")
 
-dist_matrix(1)
+    return matrix_
+
+def transform_to_matrix:
+    a=0
+
+def assign_values_to_diagonal_matrix(values, m1, r_index, c_index):
+
+    r = int(values[0][r_index])
+    c = int(values[0][c_index])
+
+    if r == c:
+        return
+
+    w = int(values[0][2])
+
+    if not r in m1:
+        m1[r] = {}
+
+    if not c in m1[r]:
+        m1[r][c] = 0
+
+    m1[r][c] += w
+
+
+def print_matrix(matrix_):
+    index = sorted(matrix_)
+
+    print "--" + "\t",
+
+    nodes_names = get_nodes_names()
+
+    for r in index:
+        print nodes_names[r] + "\t",
+
+    print ""
+
+    for r in index:
+        print "--" + "\t",
+
+    print "-"
+
+    for r in index:
+        print nodes_names[r] + "|\t",
+        for c in index:
+            if r == c:
+                print "-\t",
+            elif c in matrix_[r]:
+                print str(matrix_[r][c]) + "\t",
+            else:
+                print "0\t",
+
+        print ""
+
+
+def get_nodes_names():
+    all_nodes = cypher(qf.get_query("get_all"))
+
+    f = open("temp", "a+")
+    writer = tool.ResultWriter(f)
+    writer.write("text", all_nodes)
+    f.seek(0)
+    lines = f.read()
+    f.close()
+
+    node_regex = '\(([\d]+) \{"name":"([\w]+)"\}'
+    entries = re.findall(node_regex, lines, re.MULTILINE)
+
+    maps = {}
+    for entry in entries:
+        maps[int(entry[0])] = entry[1]
+
+    return maps
+
+
+#get_nodes_names()
+
+#dist_matrix(1)
+#print "-------------------------------"
+#dist_matrix(2)
+#print "-------------------------------"
+dist_matrix_(1)
+#print "-------------------------------"
+#dist_matrix(6)
+#print "-------------------------------"
+#dist_matrix(7)
