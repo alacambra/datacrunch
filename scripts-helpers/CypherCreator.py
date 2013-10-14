@@ -83,6 +83,6 @@ class NodeGroup:
         return self.parent_lvl;
 
     def get_names(self):
-        names = self.childs
+        names = list(self.childs)
         names.append(self.parent)
         return names

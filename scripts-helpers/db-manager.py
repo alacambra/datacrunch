@@ -6,8 +6,6 @@ import CypherCreator as qc
 import QueryFetcher as qf
 import NamesCounter as nc
 import re
-from numpy import matrix
-from numpy import linalg
 
 
 uri = "http://marceli:7474/db/data";
@@ -18,8 +16,8 @@ def cypher(query):
     print query
     return neo4j.CypherQuery(graph_db, query).execute()
 
-#cypher(qf.get_query("remove_all"))
-#cypher(qc.CypherCreator().create_query())
+cypher(qf.get_query("remove_all"))
+cypher(qc.CypherCreator().create_query())
 
 
 def rel_weight():
@@ -56,7 +54,7 @@ def dist_matrix_(distance):
 
         if len(l) == 0:
             continue
-
+        print line
         assign_values_to_diagonal_matrix(l, matrix_, 0, 1)
         assign_values_to_diagonal_matrix(l, matrix_, 1, 0)
 
@@ -67,8 +65,6 @@ def dist_matrix_(distance):
 
     return matrix_
 
-def transform_to_matrix:
-    a=0
 
 def assign_values_to_diagonal_matrix(values, m1, r_index, c_index):
 
@@ -88,8 +84,13 @@ def assign_values_to_diagonal_matrix(values, m1, r_index, c_index):
 
     m1[r][c] += w
 
+    m = get_nodes_names()
+
+    print "(" + m[r] + "," + m[c] + ") = " + str(m1[r][c])
+
 
 def print_matrix(matrix_):
+
     index = sorted(matrix_)
 
     print "--" + "\t",
@@ -141,11 +142,11 @@ def get_nodes_names():
 
 #get_nodes_names()
 
-#dist_matrix(1)
-#print "-------------------------------"
-#dist_matrix(2)
-#print "-------------------------------"
 dist_matrix_(1)
+#print "-------------------------------"
+#dist_matrix_(2)
+#print "-------------------------------"
+#dist_matrix_(1)
 #print "-------------------------------"
 #dist_matrix(6)
 #print "-------------------------------"
