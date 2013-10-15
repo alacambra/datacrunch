@@ -1,4 +1,4 @@
-package de.ion2s.sqlingestion;
+package de.ion2s.sqlingestion.controller;
 
 import java.text.DateFormat;
 import java.util.Date;

@@ -21,7 +21,7 @@
 		<beans:property name="suffix" value=".jsp" />
 	</beans:bean>
 	
-	<context:component-scan base-package="de.ion2s.sqlingestion" />
+	<context:component-scan base-package="de.ion2s.sqlingestion.controller" />
 	
 	
 	
