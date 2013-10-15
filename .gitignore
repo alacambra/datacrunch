@@ -1,1 +1,6 @@
 .idea/
+*/target/
+*/.classpath
+*/.project
+*/.settings
+*/bin/
