@@ -6,11 +6,10 @@ import CypherCreator as qc
 import QueryFetcher as qf
 import NamesCounter as nc
 import re
-
+from redmine_model import Issue as iss
 
 uri = "http://marceli:7474/db/data";
 graph_db = neo4j.GraphDatabaseService(uri);
-
 
 def cypher(query):
     print query
@@ -54,7 +53,7 @@ def dist_matrix_(distance):
 
         if len(l) == 0:
             continue
-        print line
+
         assign_values_to_diagonal_matrix(l, matrix_, 0, 1)
         assign_values_to_diagonal_matrix(l, matrix_, 1, 0)
 
@@ -83,10 +82,6 @@ def assign_values_to_diagonal_matrix(values, m1, r_index, c_index):
         m1[r][c] = 0
 
     m1[r][c] += w
-
-    m = get_nodes_names()
-
-    print "(" + m[r] + "," + m[c] + ") = " + str(m1[r][c])
 
 
 def print_matrix(matrix_):

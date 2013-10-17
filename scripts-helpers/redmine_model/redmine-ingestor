@@ -1,0 +1,21 @@
+import MySQLdb
+import Project
+
+
+db = MySQLdb.connect(host=
+"marceli", # your host, usually localhost
+                     user="root", # your username
+                      passwd="root", # your password
+                      db="redmine") # name of the data base
+cur = db.cursor()
+cur.execute("SELECT * FROM basic_info")
+
+query_projects = "SELECT id, name, description, parent_id FROM redmine.projects limit 1;"
+query_issues = "SELECT * FROM issues"
+query_time_entries = "SELECT * FROM time_entries"
+
+q = cur.execute(query_projects)
+
+for row in cur.fetchall():
+    p = Project(q)
+    #print p.__str__()
