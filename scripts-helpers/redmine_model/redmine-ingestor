@@ -1,21 +1,120 @@
 import MySQLdb
 import Project
+import Issue
+import TimeEntry
+from multiprocess import MultiQuery
+from multiprocessing import Pipe
+
+db = MySQLdb.connect(
+    host="marceli", # your host, usually localhost
+    user="root", # your username
+    passwd="root", # your password
+    db="redmine") # name of the data base
+
+query_num_projects = "SELECT count(*) as total FROM redmine.projects"
+query_num_issues = "SELECT count(*) as total FROM redmine.issues"
+query_num_time_entries = "SELECT count(*) as total FROM redmine.time_entries"
+
+query_projects = "SELECT id, name, description, parent_id FROM projects"
+query_issues = "SELECT id, project_id, subject, description FROM issues"
+query_time_entries = "SELECT id, project_id, user_id, issue_id, hours, comments FROM time_entries"
+
+projects = {}
+issues = {}
+time_entries = {}
 
 
-db = MySQLdb.connect(host=
-"marceli", # your host, usually localhost
-                     user="root", # your username
-                      passwd="root", # your password
-                      db="redmine") # name of the data base
+def get_total_entries(cursor, query):
+    cursor.execute(query)
+    n = cursor.fetchall()
+    return n[0][0]
+
+
 cur = db.cursor()
-cur.execute("SELECT * FROM basic_info")
+num_projects = get_total_entries(cur, query_num_projects)
+num_issues = get_total_entries(cur, query_num_issues)
+num_time_entries = get_total_entries(cur, query_num_time_entries)
 
-query_projects = "SELECT id, name, description, parent_id FROM redmine.projects limit 1;"
-query_issues = "SELECT * FROM issues"
-query_time_entries = "SELECT * FROM time_entries"
+start = 0
+procs_projects = {}
+procs_issues = {}
+procs_time_entries = {}
+step = 1000
 
-q = cur.execute(query_projects)
 
-for row in cur.fetchall():
-    p = Project(q)
-    #print p.__str__()
+for i in range(0,1):
+    for i in range(0, num_projects + step, step):
+
+        parent_conn, child_conn = Pipe()
+        query = query_projects + " limit " + str(start) + ", " + str(i)
+        mq = MultiQuery.MultiQuery(query, db, child_conn)
+        mq.start()
+        resp = parent_conn.recv()
+        procs_projects[mq] = resp
+        start = i+1
+        print "p" + str(i)
+
+    for i in range(0, num_issues + step, step):
+
+        parent_conn, child_conn = Pipe()
+        query = query_issues + " limit " + str(start) + ", " + str(i)
+        mq = MultiQuery.MultiQuery(query, db, child_conn)
+        mq.start()
+        resp = parent_conn.recv()
+        procs_issues[mq] = resp
+        start = i+1
+        #print "i" + str(i)
+
+    for i in range(0, num_time_entries + step, step):
+
+        parent_conn, child_conn = Pipe()
+        query = query_num_time_entries + " limit " + str(start) + ", " + str(i)
+        mq = MultiQuery.MultiQuery(query, db, child_conn)
+        mq.start()
+        resp = parent_conn.recv()
+        procs_time_entries[mq] = resp
+        start = i+1
+        #print "te" + str(i)
+
+f = open("removeme", "a+")
+
+for proc in procs_projects:
+    proc.join()
+    for p in procs_projects[proc]:
+        f.write(str(p))
+    print proc
+
+for proc in procs_issues:
+    proc.join()
+    print proc
+
+for proc in procs_time_entries:
+    proc.join()
+    print proc
+
+#print procs_projects
+#print procs_issues
+#print procs_time_entries
+
+#
+#for row in cur.fetchall():
+#    p = Project.Project(row)
+#    projects[p.id] = p
+
+#q = cur.execute(query_issues)
+#for row in cur.fetchall():
+#    i = Issue.Issue(row)
+#    issues[i.id] = i
+
+#q = cur.execute(query_time_entries)
+#for row in cur.fetchall():
+#    print row
+#    te = TimeEntry.TimeEntry(row)
+#    time_entries[te.id] = te
+#    break
+
+#print projects
+#print issues
+#print time_entries
+
+
