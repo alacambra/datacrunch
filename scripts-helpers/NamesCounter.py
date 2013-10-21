@@ -44,6 +44,7 @@ class NamesCounter:
         #print self.get_final_points(s.split("\n"))
         return s
 
+
 def map_replace(matchobj):
     return "(" + names_[matchobj.group(1)] + ")";
 

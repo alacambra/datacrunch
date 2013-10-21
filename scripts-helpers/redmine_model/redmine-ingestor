@@ -5,116 +5,120 @@ import TimeEntry
 from multiprocess import MultiQuery
 from multiprocessing import Pipe
 
-db = MySQLdb.connect(
-    host="marceli", # your host, usually localhost
-    user="root", # your username
-    passwd="root", # your password
-    db="redmine") # name of the data base
 
-query_num_projects = "SELECT count(*) as total FROM redmine.projects"
-query_num_issues = "SELECT count(*) as total FROM redmine.issues"
-query_num_time_entries = "SELECT count(*) as total FROM redmine.time_entries"
+def do_it():
+    db = MySQLdb.connect(
+        host="marceli", # your host, usually localhost
+        user="root", # your username
+        passwd="root", # your password
+        db="redmine") # name of the data base
 
-query_projects = "SELECT id, name, description, parent_id FROM projects"
-query_issues = "SELECT id, project_id, subject, description FROM issues"
-query_time_entries = "SELECT id, project_id, user_id, issue_id, hours, comments FROM time_entries"
+    query_projects = "SELECT id, name, description, parent_id FROM projects"
+    query_issues = "SELECT id, project_id, subject, description FROM issues"
+    query_time_entries = '''SELECT te.id, te.project_id, user_id, issue_id, hours, comments, e.id, e.name
+                        FROM time_entries as te inner join enumerations as e on te.activity_id = e.id'''
 
-projects = {}
-issues = {}
-time_entries = {}
+    projects = {}
+    issues = {}
+    time_entries = {}
+
+    num_projects = get_number_of_rows(db, "projects")
+    num_issues = get_number_of_rows(db, "issues")
+    num_time_entries = get_number_of_rows(db, "time_entries")
+
+    start = 0
+    procs_projects = {}
+    procs_issues = {}
+    procs_time_entries = {}
+    step = 1000
+
+    run_query(query_projects, num_projects, step, procs_projects, db)
+    object_generation(Project, projects, procs_projects)
+
+    run_query(query_issues, num_issues, step, procs_issues, db)
+    object_generation(Issue, issues, procs_issues)
+
+    run_query(query_time_entries, num_time_entries, step, procs_time_entries, db)
+    object_generation(TimeEntry, time_entries, procs_time_entries)
 
 
-def get_total_entries(cursor, query):
-    cursor.execute(query)
-    n = cursor.fetchall()
-    return n[0][0]
+def run_query(q, final, step, procs_projects, db):
 
-
-cur = db.cursor()
-num_projects = get_total_entries(cur, query_num_projects)
-num_issues = get_total_entries(cur, query_num_issues)
-num_time_entries = get_total_entries(cur, query_num_time_entries)
-
-start = 0
-procs_projects = {}
-procs_issues = {}
-procs_time_entries = {}
-step = 1000
-
-
-for i in range(0,1):
-    for i in range(0, num_projects + step, step):
-
+    start = 0
+    for i in range(0, final + step, step):
         parent_conn, child_conn = Pipe()
-        query = query_projects + " limit " + str(start) + ", " + str(i)
+        query = q + " limit " + str(start) + ", " + str(i)
         mq = MultiQuery.MultiQuery(query, db, child_conn)
         mq.start()
         resp = parent_conn.recv()
         procs_projects[mq] = resp
         start = i+1
-        print "p" + str(i)
 
-    for i in range(0, num_issues + step, step):
 
-        parent_conn, child_conn = Pipe()
-        query = query_issues + " limit " + str(start) + ", " + str(i)
-        mq = MultiQuery.MultiQuery(query, db, child_conn)
-        mq.start()
-        resp = parent_conn.recv()
-        procs_issues[mq] = resp
-        start = i+1
-        #print "i" + str(i)
+def object_generation(clazz, container, procs_container):
+    for proc in procs_container:
+        proc.join()
+        for p in procs_container[proc]:
+            o = clazz.Object(p)
+            container[o.id] = o
+            str(o)
 
-    for i in range(0, num_time_entries + step, step):
 
-        parent_conn, child_conn = Pipe()
-        query = query_num_time_entries + " limit " + str(start) + ", " + str(i)
-        mq = MultiQuery.MultiQuery(query, db, child_conn)
-        mq.start()
-        resp = parent_conn.recv()
-        procs_time_entries[mq] = resp
-        start = i+1
-        #print "te" + str(i)
+def get_number_of_rows(db, table_name):
 
-f = open("removeme", "a+")
+    q = "SELECT count(*) as total FROM redmine." + table_name
 
-for proc in procs_projects:
-    proc.join()
-    for p in procs_projects[proc]:
-        f.write(str(p))
-    print proc
+    cursor = db.cursor()
+    cursor.execute(q)
+    n = cursor.fetchall()
+    return n[0][0]
 
-for proc in procs_issues:
-    proc.join()
-    print proc
+do_it()
 
-for proc in procs_time_entries:
-    proc.join()
-    print proc
 
-#print procs_projects
-#print procs_issues
-#print procs_time_entries
 
-#
-#for row in cur.fetchall():
-#    p = Project.Project(row)
-#    projects[p.id] = p
 
-#q = cur.execute(query_issues)
-#for row in cur.fetchall():
-#    i = Issue.Issue(row)
-#    issues[i.id] = i
 
-#q = cur.execute(query_time_entries)
-#for row in cur.fetchall():
-#    print row
-#    te = TimeEntry.TimeEntry(row)
-#    time_entries[te.id] = te
-#    break
 
-#print projects
-#print issues
-#print time_entries
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

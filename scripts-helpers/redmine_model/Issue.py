@@ -1,4 +1,4 @@
-class Issue:
+class Object:
     def __init__(self, row):
 
         self.project_id = row[1]

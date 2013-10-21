@@ -1,4 +1,4 @@
-class TimeEntry:
+class Object:
 
     def __init__(self, row):
         self.id = row[0]
@@ -7,3 +7,5 @@ class TimeEntry:
         self.issue_id = row[3]
         self.hours = row[4]
         self.comment = row[5]
+        self.activity_id = row[6]
+        self.activity_name = row[7]

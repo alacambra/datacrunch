@@ -1,4 +1,4 @@
-class Project:
+class Object:
 
     def __init__(self, row):
 
