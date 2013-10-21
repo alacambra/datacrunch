@@ -15,8 +15,8 @@ def cypher(query):
     print query
     return neo4j.CypherQuery(graph_db, query).execute()
 
-cypher(qf.get_query("remove_all"))
-cypher(qc.CypherCreator().create_query())
+#cypher(qf.get_query("remove_all"))
+#cypher(qc.CypherCreator().create_query())
 
 
 def rel_weight():

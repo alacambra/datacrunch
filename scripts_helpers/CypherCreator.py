@@ -2,7 +2,6 @@ from gi.overrides.GLib import child_watch_add
 from nis import match
 from random import randint
 
-
 class CypherCreator:
 
     def __init__(self):

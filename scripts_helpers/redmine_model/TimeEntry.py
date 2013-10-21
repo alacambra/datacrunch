@@ -1,6 +1,9 @@
-class Object:
+from AbstractItem import AbstractItem
 
-    def __init__(self, row):
+
+class Object(AbstractItem):
+
+    def __init__(self, row, order):
         self.id = row[0]
         self.project_id = row[1]
         self.user_id = row[2]
@@ -9,3 +12,4 @@ class Object:
         self.comment = row[5]
         self.activity_id = row[6]
         self.activity_name = row[7]
+        AbstractItem.__init__(self, "TIME_ENTRY", order)

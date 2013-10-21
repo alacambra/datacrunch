@@ -4,7 +4,8 @@ import Issue
 import TimeEntry
 from multiprocess import MultiQuery
 from multiprocessing import Pipe
-
+from py2neo import neo4j, node, rel
+from py2neo.neo4j import WriteBatch
 
 def do_it():
     db = MySQLdb.connect(
@@ -26,26 +27,32 @@ def do_it():
     num_issues = get_number_of_rows(db, "issues")
     num_time_entries = get_number_of_rows(db, "time_entries")
 
-    start = 0
     procs_projects = {}
     procs_issues = {}
     procs_time_entries = {}
+    ordered_container = []
     step = 1000
+    order = 0
 
     run_query(query_projects, num_projects, step, procs_projects, db)
-    object_generation(Project, projects, procs_projects)
-
     run_query(query_issues, num_issues, step, procs_issues, db)
-    object_generation(Issue, issues, procs_issues)
-
     run_query(query_time_entries, num_time_entries, step, procs_time_entries, db)
-    object_generation(TimeEntry, time_entries, procs_time_entries)
+
+    print "queries runned"
+
+    object_generation(Project, projects, procs_projects, order, ordered_container)
+    object_generation(Issue, issues, procs_issues, order, ordered_container)
+    object_generation(TimeEntry, time_entries, procs_time_entries, order, ordered_container)
+
+    print "objects created"
+
+    create_nodes(ordered_container, projects, issues, time_entries)
 
 
 def run_query(q, final, step, procs_projects, db):
 
     start = 0
-    for i in range(0, final + step, step):
+    for i in range(step, final + step, step):
         parent_conn, child_conn = Pipe()
         query = q + " limit " + str(start) + ", " + str(i)
         mq = MultiQuery.MultiQuery(query, db, child_conn)
@@ -55,13 +62,15 @@ def run_query(q, final, step, procs_projects, db):
         start = i+1
 
 
-def object_generation(clazz, container, procs_container):
+def object_generation(clazz, container, procs_container, order, ordered_container):
     for proc in procs_container:
         proc.join()
         for p in procs_container[proc]:
-            o = clazz.Object(p)
+            o = clazz.Object(p, order)
             container[o.id] = o
-            str(o)
+            ordered_container.insert(order, o)
+            order += 1
+
 
 
 def get_number_of_rows(db, table_name):
@@ -73,8 +82,43 @@ def get_number_of_rows(db, table_name):
     n = cursor.fetchall()
     return n[0][0]
 
-do_it()
 
+def create_nodes(ordered_container, projects, issues, time_entries):
+
+    uri = "http://marceli:7474/db/data";
+    graph_db = neo4j.GraphDatabaseService(uri);
+    wbatch = WriteBatch(graph_db)
+
+    print "adding items"
+    for item in ordered_container:
+
+        if item.type == "PROJECT":
+            wbatch.create(node(name=item.id))
+
+        elif item.type == "ISSUE":
+            wbatch.create(node(name=item.subject))
+
+        elif item.type == "TIME_ENTRY":
+            wbatch.create(node(name=item.id))
+
+        #print str(item)
+
+    print "adding relations"
+    for project in projects.values():
+
+        if not isinstance(project, Project.Object):
+            print str(project) + " is not a project."
+            continue
+
+        if project.parent_id is not None:
+            #print str(project.order) + " child " + str(projects[project.parent_id].order)
+            wbatch.create(rel(project.order, "child", projects[project.parent_id].order))
+
+    wbatch.submit()
+
+
+do_it()
+#create_node()
 
 
 

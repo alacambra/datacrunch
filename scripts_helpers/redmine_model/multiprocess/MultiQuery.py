@@ -1,6 +1,4 @@
 import multiprocessing
-import time
-
 
 class MultiQuery(multiprocessing.Process):
 
