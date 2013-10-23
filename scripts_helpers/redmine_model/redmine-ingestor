@@ -1,13 +1,22 @@
 import MySQLdb
-import Project
-import Issue
-import TimeEntry
-from multiprocess import MultiQuery
 from multiprocessing import Pipe
+
 from py2neo import neo4j, node, rel
 from py2neo.neo4j import WriteBatch
 
+from Project import Project
+from Issue import Issue
+from TimeEntry import TimeEntry
+from User import User
+from Activity import Activity
+from scripts_helpers.multiprocess import MultiQuery
+import scripts_helpers.clear_graph_db as cgdb
+
+
 def do_it():
+
+    cgdb.run()
+
     db = MySQLdb.connect(
         host="marceli", # your host, usually localhost
         user="root", # your username
@@ -17,36 +26,49 @@ def do_it():
     query_projects = "SELECT id, name, description, parent_id FROM projects"
     query_issues = "SELECT id, project_id, subject, description FROM issues"
     query_time_entries = '''SELECT te.id, te.project_id, user_id, issue_id, hours, comments, e.id, e.name
-                        FROM time_entries as te inner join enumerations as e on te.activity_id = e.id'''
+                        FROM time_entries as te inner join enumerations as e on te.activity_id = e.id '''
+    query_users = "SELECT id, login FROM users"
+    query_activities = "SELECT id, name FROM enumerations"
 
     projects = {}
     issues = {}
     time_entries = {}
+    users = {}
+    activities = {}
 
     num_projects = get_number_of_rows(db, "projects")
     num_issues = get_number_of_rows(db, "issues")
     num_time_entries = get_number_of_rows(db, "time_entries")
+    num_time_entries = 1000
+    num_users = get_number_of_rows(db, "users")
+    num_activities = get_number_of_rows(db, "enumerations")
 
     procs_projects = {}
     procs_issues = {}
     procs_time_entries = {}
+    procs_users = {}
+    procs_activities = {}
     ordered_container = []
-    step = 1000
+    step = 10000
     order = 0
 
     run_query(query_projects, num_projects, step, procs_projects, db)
     run_query(query_issues, num_issues, step, procs_issues, db)
     run_query(query_time_entries, num_time_entries, step, procs_time_entries, db)
+    run_query(query_users, num_users, step, procs_users, db)
+    run_query(query_activities, num_activities, step, procs_activities, db)
 
     print "queries runned"
 
-    object_generation(Project, projects, procs_projects, order, ordered_container)
-    object_generation(Issue, issues, procs_issues, order, ordered_container)
-    object_generation(TimeEntry, time_entries, procs_time_entries, order, ordered_container)
+    order = object_generation(Project, projects, procs_projects, order, ordered_container)
+    order = object_generation(Issue, issues, procs_issues, order, ordered_container)
+    order = object_generation(TimeEntry, time_entries, procs_time_entries, order, ordered_container)
+    order = object_generation(User, users, procs_users, order, ordered_container)
+    object_generation(Activity, activities, procs_activities, order, ordered_container)
 
     print "objects created"
 
-    create_nodes(ordered_container, projects, issues, time_entries)
+    create_nodes(ordered_container, projects, issues, time_entries, users, activities)
 
 
 def run_query(q, final, step, procs_projects, db):
@@ -54,7 +76,7 @@ def run_query(q, final, step, procs_projects, db):
     start = 0
     for i in range(step, final + step, step):
         parent_conn, child_conn = Pipe()
-        query = q + " limit " + str(start) + ", " + str(i)
+        query = q + " limit " + str(start) + ", " + str(step)
         mq = MultiQuery.MultiQuery(query, db, child_conn)
         mq.start()
         resp = parent_conn.recv()
@@ -66,10 +88,12 @@ def object_generation(clazz, container, procs_container, order, ordered_containe
     for proc in procs_container:
         proc.join()
         for p in procs_container[proc]:
-            o = clazz.Object(p, order)
+            o = clazz(p, order)
             container[o.id] = o
-            ordered_container.insert(order, o)
+            ordered_container.insert(order+1, o)
             order += 1
+
+    return order
 
 
 
@@ -83,45 +107,76 @@ def get_number_of_rows(db, table_name):
     return n[0][0]
 
 
-def create_nodes(ordered_container, projects, issues, time_entries):
+def create_nodes(ordered_container, projects, issues, time_entries, users, activities):
 
     uri = "http://marceli:7474/db/data";
     graph_db = neo4j.GraphDatabaseService(uri);
     wbatch = WriteBatch(graph_db)
 
     print "adding items"
+
+    nodes_file = open("nodes_file", "w+")
+    rels_file = open("rels_file", "w+")
+
     for item in ordered_container:
 
-        if item.type == "PROJECT":
-            wbatch.create(node(name=item.id))
+        try:
+            if item.item_type == "PROJECT":
+                wbatch.create(node(uid=item.get_unique_name(), name=item.name, description=item.description))
 
-        elif item.type == "ISSUE":
-            wbatch.create(node(name=item.subject))
+            elif item.item_type == "ISSUE":
+                wbatch.create(node(uid=item.get_unique_name(), subject=item.subject, description=item.description))
 
-        elif item.type == "TIME_ENTRY":
-            wbatch.create(node(name=item.id))
+            elif item.item_type == "TIME_ENTRY":
+                wbatch.create(node(uid=item.get_unique_name(), comment=item.comment, hours=item.hours))
 
-        #print str(item)
+            elif item.item_type == "USER":
+                wbatch.create(node(uid=item.get_unique_name(), login=item.login))
+
+            elif item.item_type == "ACTIVITY":
+                wbatch.create(node(uid=item.get_unique_name(), name=item.name))
+
+        except Exception as e:
+            print str(item)
+            print item.item_type
+            print e.message
+            break
 
     print "adding relations"
+
     for project in projects.values():
 
-        if not isinstance(project, Project.Object):
+        if not isinstance(project, Project):
             print str(project) + " is not a project."
             continue
 
         if project.parent_id is not None:
-            #print str(project.order) + " child " + str(projects[project.parent_id].order)
+            rels_file.write(str(project) + "->child->" + str(projects[project.parent_id]) + "\n")
             wbatch.create(rel(project.order, "child", projects[project.parent_id].order))
 
+    for issue in issues.values():
+        if issue.project_id in projects:
+            wbatch.create(rel(projects[issue.project_id].order, "has_issue", issue.order))
+
+    for te in time_entries.values():
+        if te.project_id in projects:
+            wbatch.create(rel(projects[te.project_id].order, "p_has_te", te.order))
+        if te.issue_id in issues:
+            wbatch.create(rel(issues[te.issue_id].order, "i_has_te", te.order))
+
+        wbatch.create(rel(users[te.user_id].order, "does", te.order))
+        wbatch.create(rel( te.order, "uses_service", activities[te.activity_id].order))
+
+
+    print "submiting graph"
+
+    nodes_file.close()
+    rels_file.close()
     wbatch.submit()
 
 
 do_it()
 #create_node()
-
-
-
 
 
 
