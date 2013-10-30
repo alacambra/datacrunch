@@ -1,23 +1,12 @@
-#from nltk.corpus import gutenberg
+# -*- coding: utf-8 -*-
+import operator
 from nltk import Text
 from nltk.probability import FreqDist
 import MySQLdb
 import codecs
 import re
+import os.path
 import nltk
-
-#print gutenberg.words('php_comments.csv')
-
-#t = Text(gutenberg.words('php_comments.csv'))
-#print t.common_contexts(["javascript"])
-#print t.similar("javascrit")
-#t.dispersion_plot(["javascript"])
-
-#f = FreqDist(t)
-#f.plot(50)
-#print f.hapaxes()
-#v = f.keys()
-#print v[0:1000]
 
 db = MySQLdb.connect(
         host="marceli", # your host, usually localhost
@@ -74,11 +63,6 @@ def get_words():
                     if word_is_valid(w):
                         to_analyze.append(w)
 
-
-            #except Exception as e:
-            #    print e
-            #    print text
-
         services_dict[service[0].name] = to_analyze
 
     return services_dict
@@ -95,7 +79,8 @@ def generate_weight_dictionary(service, words):
     f = FreqDist(t)
 
     for w in f:
-        df.write(codecs.decode(w, "unicode_escape") + "\t" + str(f[w]) + "\n")
+        weight = 100 * f.freq(w)
+        df.write(codecs.decode(w, "unicode_escape") + "\t" + str(weight) + "\n")
 
     df.close()
 
@@ -155,10 +140,117 @@ def word_is_valid(w):
 
     return True
 
-all = get_words()
 
-for service in all:
-    generate_weight_dictionary(service.replace("/", "-"), all[service])
+def generate_dics():
+    all = get_words()
+
+    for service in all:
+        generate_weight_dictionary(service.replace("/", "-").lower(), all[service])
+
+
+def test(s):
+
+    services = get_services()
+    scores = {}
+    s = s.lower()
+    for service in services:
+
+        service_words = load_dict(service)
+
+        if not service_words:
+            continue
+
+        words = [clean_word(w) for w in s.split(" ") if word_is_valid(w)]
+
+        score = 0
+
+        for w in words:
+            if w in service_words:
+                score += float(service_words[w])
+
+        scores[service] = score
+
+    sorted_x = sorted(scores.iteritems(), key=operator.itemgetter(1), reverse=True)
+
+    for x in sorted_x:
+        print x
+
+
+def load_dict(service_name):
+    file_name = get_service_file_name(service_name)
+
+    if not os.path.isfile(file_name):
+        return False
+
+    service_file = open(file_name, "r+")
+    service_words = service_file.readlines()
+    dict = {}
+
+    for w in service_words:
+        w = w.split("\t")
+        dict[w[0]] = w[1][:-1]
+
+    return dict
+
+
+def get_service_file_name(service):
+    return "dicts/" + service.replace("/", "-").lower() + ".dict"
+
+#generate_dics()
+test("Erstellung UnitTests für JS")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
