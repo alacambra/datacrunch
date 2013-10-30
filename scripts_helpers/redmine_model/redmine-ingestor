@@ -1,14 +1,12 @@
 import MySQLdb
 from multiprocessing import Pipe
+import nltk
+from pandas.io.parsers import _clean_index_names
 
 from py2neo import neo4j, node, rel
 from py2neo.neo4j import WriteBatch
 
-from Project import Project
-from Issue import Issue
-from TimeEntry import TimeEntry
-from User import User
-from Activity import Activity
+from models import *
 from scripts_helpers.multiprocess import MultiQuery
 import scripts_helpers.clear_graph_db as cgdb
 
@@ -39,7 +37,7 @@ def do_it():
     num_projects = get_number_of_rows(db, "projects")
     num_issues = get_number_of_rows(db, "issues")
     num_time_entries = get_number_of_rows(db, "time_entries")
-    num_time_entries = 1000
+    num_time_entries = 00
     num_users = get_number_of_rows(db, "users")
     num_activities = get_number_of_rows(db, "enumerations")
 
@@ -96,7 +94,6 @@ def object_generation(clazz, container, procs_container, order, ordered_containe
     return order
 
 
-
 def get_number_of_rows(db, table_name):
 
     q = "SELECT count(*) as total FROM redmine." + table_name
@@ -115,26 +112,31 @@ def create_nodes(ordered_container, projects, issues, time_entries, users, activ
 
     print "adding items"
 
-    nodes_file = open("nodes_file", "w+")
-    rels_file = open("rels_file", "w+")
+    #nodes_file = open("nodes_file", "w+")
+    #rels_file = open("rels_file", "w+")
 
     for item in ordered_container:
 
         try:
             if item.item_type == "PROJECT":
-                wbatch.create(node(uid=item.get_unique_name(), name=item.name, description=item.description))
+                n = node(uid=item.get_unique_name(), name=item.name, description=item.description)
 
             elif item.item_type == "ISSUE":
-                wbatch.create(node(uid=item.get_unique_name(), subject=item.subject, description=item.description))
+                n = node(uid=item.get_unique_name(), subject=item.subject, description=item.description)
 
             elif item.item_type == "TIME_ENTRY":
-                wbatch.create(node(uid=item.get_unique_name(), comment=item.comment, hours=item.hours))
+                n = node(uid=item.get_unique_name(), comment=item.comment, hours=item.hours)
 
             elif item.item_type == "USER":
-                wbatch.create(node(uid=item.get_unique_name(), login=item.login))
+                n = node(uid=item.get_unique_name(), login=item.login)
 
             elif item.item_type == "ACTIVITY":
-                wbatch.create(node(uid=item.get_unique_name(), name=item.name))
+                n = node(uid=item.get_unique_name(), name=item.name)
+
+            index_name = "NODES"
+            index_key = "TYPE"
+            val = item.item_type
+            wbatch.create_in_index(neo4j.Node, index_name, index_key, val, n)
 
         except Exception as e:
             print str(item)
@@ -144,34 +146,33 @@ def create_nodes(ordered_container, projects, issues, time_entries, users, activ
 
     print "adding relations"
 
-    for project in projects.values():
-
-        if not isinstance(project, Project):
-            print str(project) + " is not a project."
-            continue
-
-        if project.parent_id is not None:
-            rels_file.write(str(project) + "->child->" + str(projects[project.parent_id]) + "\n")
-            wbatch.create(rel(project.order, "child", projects[project.parent_id].order))
-
-    for issue in issues.values():
-        if issue.project_id in projects:
-            wbatch.create(rel(projects[issue.project_id].order, "has_issue", issue.order))
-
-    for te in time_entries.values():
-        if te.project_id in projects:
-            wbatch.create(rel(projects[te.project_id].order, "p_has_te", te.order))
-        if te.issue_id in issues:
-            wbatch.create(rel(issues[te.issue_id].order, "i_has_te", te.order))
-
-        wbatch.create(rel(users[te.user_id].order, "does", te.order))
-        wbatch.create(rel( te.order, "uses_service", activities[te.activity_id].order))
-
+    #for project in projects.values():
+    #
+    #    if not isinstance(project, Project):
+    #        print str(project) + " is not a project."
+    #        continue
+    #
+    #    if project.parent_id is not None:
+    #        #rels_file.write(str(project) + "->child->" + str(projects[project.parent_id]) + "\n")
+    #        wbatch.create(rel(project.order, "child", projects[project.parent_id].order))
+    #
+    #for issue in issues.values():
+    #    if issue.project_id in projects:
+    #        wbatch.create(rel(projects[issue.project_id].order, "has_issue", issue.order))
+    #
+    #for te in time_entries.values():
+    #    if te.project_id in projects:
+    #        wbatch.create(rel(projects[te.project_id].order, "p_has_te", te.order))
+    #    if te.issue_id in issues:
+    #        wbatch.create(rel(issues[te.issue_id].order, "i_has_te", te.order))
+    #
+    #    wbatch.create(rel(users[te.user_id].order, "does", te.order))
+    #    wbatch.create(rel(te.order, "uses_service", activities[te.activity_id].order))
 
     print "submiting graph"
 
-    nodes_file.close()
-    rels_file.close()
+    #nodes_file.close()
+    #rels_file.close()
     wbatch.submit()
 
 

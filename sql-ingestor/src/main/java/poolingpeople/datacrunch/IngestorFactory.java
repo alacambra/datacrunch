@@ -24,6 +24,56 @@ public class IngestorFactory implements IIngestorFactory  {
 		s.getTransaction().commit();
 
 		return bl;
+	}
+	
+	public static void main(String[] args) {
 		
+		Session s = HibernateUtil.getSessionFactory().getCurrentSession();
+		s.beginTransaction();
+		Object a = s.getNamedQuery("getAllUsers").list();
+		s.getTransaction().commit();
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
