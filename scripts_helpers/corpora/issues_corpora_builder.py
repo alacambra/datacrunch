@@ -1,38 +1,37 @@
 # -*- coding: utf-8 -*-
 import os
-import MySQLdb
 import helper
 import codecs
-import operator
+from helper import Dictionary
 
-db = MySQLdb.connect(
-        host="marceli",
-        user="root",
-        passwd="root",
-        db="redmine")
+dictionary = Dictionary("from_issues")
+
+
+def generate_dicts():
+    get_words()
 
 
 def get_words():
 
     query = "SELECT invested_time, subject FROM activities_by_issue where activity_id = "
     stop_words = helper.get_stop_words()
-    services = helper.get_services().values()
+    services = helper.get_services()
 
     services_dict = {}
     times = get_total_services_time()
 
     for service in services:
-        if service[0].name in services_dict:
+        if service in services_dict:
             continue
 
         q = query
-        print "analysing for " + service[0].name + 50*"-"
+        print "analysing for " + service + 50*"-"
 
-        for s in service:
+        for s in services[service]:
             q = q + str(s.id) + " OR activity_id = "
 
         q = q[0:-len(" OR activity_id = ")]
-        cursor = db.cursor()
+        cursor = helper.db.cursor()
         cursor.execute(q)
         entries = cursor.fetchall()
 
@@ -43,7 +42,7 @@ def get_words():
 
         for entry in entries:
 
-            current_score = entry[0] / times[service[0].name] * 100
+            current_score = entry[0] / times[service] * 100
 
             subject = entry[1]
             subject = codecs.decode(subject, "latin1").lower()
@@ -60,12 +59,13 @@ def get_words():
                     if helper.word_is_valid(w):
                         to_analyze[w] = current_score
 
-        generate_weight_dictionary(service[0].name, to_analyze)
+        generate_weight_dictionary(service, to_analyze)
 
 
 def generate_weight_dictionary(service, words):
 
-    df = codecs.open(get_dict_service_file_name(service), "w+", "utf8");
+    df = codecs.open(dictionary.get_dict_service_file_name(service), "w+", "utf8");
+    helper.generate_dictionary_size_file(dictionary)
 
     for w in words:
         df.write(codecs.decode(w, "unicode_escape") + "\t" + str(words[w]) + "\n")
@@ -76,7 +76,7 @@ def generate_weight_dictionary(service, words):
 def get_total_services_time():
 
     total_activity_time_query = "SELECT * FROM total_activity_time"
-    cursor = db.cursor()
+    cursor = helper.db.cursor()
     cursor.execute(total_activity_time_query)
     entries = cursor.fetchall()
     times = {}
@@ -92,6 +92,9 @@ def test(s):
     services = helper.get_services()
     scores = {}
     s = s.lower()
+
+    dict_weights = dictionary.get_dicts_weight()
+
     for service in services:
 
         service_words = load_dict(service)
@@ -99,26 +102,21 @@ def test(s):
         if not service_words:
             continue
 
+        dict_weight = dict_weights[service]
         words = [helper.clean_word(w) for w in s.split(" ") if helper.word_is_valid(w)]
-
         score = 0
 
         for w in words:
             if w in service_words:
                 score += float(service_words[w])
 
-        scores[service] = score
+        scores[service] = score * float(dict_weight)
 
     return scores
 
-    #sorted_x = sorted(scores.iteritems(), key=operator.itemgetter(1), reverse=True)
-    #
-    #for x in sorted_x:
-    #    print x
-
 
 def load_dict(service_name):
-    file_name = get_dict_service_file_name(service_name)
+    file_name = dictionary.get_dict_service_file_name(service_name)
 
     if not os.path.isfile(file_name):
         return False
@@ -132,18 +130,6 @@ def load_dict(service_name):
         dict[w[0]] = w[1][:-1]
 
     return dict
-
-
-def get_dict_service_file_name(service):
-    return get_dict_directory()+ service.replace("/", "-").lower() + ".dict"
-
-
-def get_dict_directory():
-    return "dicts/from_issues/"
-
-#get_words()
-#test("November-TAGs erstellt, getestet und übergeben")
-
 
 
 

@@ -1,3 +1,4 @@
+import os
 import re
 import MySQLdb
 import codecs
@@ -69,3 +70,149 @@ def get_stop_words():
     stop_words = stop_words.split("\\n")
 
     return stop_words
+
+
+class Dictionary:
+
+    def __init__(self, dict_folder_name):
+        self.dict_folder_name = dict_folder_name
+
+    def get_dict_service_file_name(self, service):
+        return self.get_dict_directory() + service.replace("/", "-").lower() + ".dict"
+
+    def get_dict_directory(self):
+        return "dicts/" + self.dict_folder_name + "/"
+
+    def get_dict_length(self, service):
+        d = open(self.get_dict_service_file_name(service))
+        return len(d.readlines())
+
+    def get_file_for_service(self, service, mode):
+        return open(self.get_dict_service_file_name(service), mode)
+
+    def get_dicts_weight_file(self):
+        return open(self.get_dict_directory() + "dicts_weight.dat", "r+")
+
+    def get_dicts_weight(self):
+
+        f = self.get_dicts_weight_file()
+        d = {}
+
+        for entry in f.readlines():
+            w = entry.split("\t")
+            d[w[0]] = w[2][:-1]
+
+        return d
+
+
+def generate_dictionary_size_file(dictionary):
+
+    sf = open(dictionary.get_dict_directory() + "dicts_weight.dat", "w+")
+
+    lengths = {}
+    total_length = 0
+    for service in get_services():
+        file_name = dictionary.get_dict_service_file_name(service)
+        if not os.path.isfile(file_name):
+            continue
+
+        f = open(file_name, "r+")
+        length = len(f.readlines())
+        total_length += length
+        lengths[service] = length
+        f.close()
+
+    for service in lengths:
+        weight = float(lengths[service]) / float(total_length)*100
+        sf.write(service + "\t" + str(length) + "\t" + str(weight) + "\n")
+
+    sf.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
