@@ -11,7 +11,6 @@ import math
 
 dictionary = Dictionary("from_comments")
 
-
 def get_words():
 
     query = "SELECT comments FROM comments_with_activity where activity_id = "
@@ -70,7 +69,7 @@ def generate_weight_dictionary(service, words):
 
     for w in f:
         weight = 100 * f.freq(w)
-        df.write(codecs.decode(w, "unicode_escape") + "\t" + str(weight) + "\n")
+        df.write(codecs.decode(w, "unicode_escape") + helper.field_separator + str(weight) + "\n")
 
 
     df.close()
@@ -134,7 +133,7 @@ def load_dict(service_name):
     dict = {}
 
     for w in service_words:
-        w = w.split("\t")
+        w = w.split(helper.field_separator)
         dict[w[0]] = w[1][:-1]
 
     return dict

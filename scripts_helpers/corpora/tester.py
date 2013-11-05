@@ -1,26 +1,21 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import print_function
 import operator
+import datetime
 import issues_corpora_builder as iss
 import activities_corpora_builder as act
 import helper
+import random
+import sys
+import os
 
-
-def individual_test(to_test):
-#txt = 'Contentpflege + HTML / CSS Anpassung'
-#txt = 'Wiki-Artikel um lokale Entwicklungsumgebung für das NPS Backend'
-#txt = "und den Trouble Assistant einzurichten erstellt"
+def individual_test(to_test, issue_weigth, activity_weight):
 
     s1 = iss.test(to_test)
     s2 = act.test(to_test)
     final = {}
 
-    issue_weigth = 0
-    activity_weight = 1
-
     for s in s1:
-        #print str(s1[s]) + str(s2[s])
-
         final[s] = issue_weigth*s1[s] + activity_weight*s2[s]
 
     return order_results(final)
@@ -32,50 +27,252 @@ def order_results(final):
     sorted_x = sorted(final.iteritems(), key=operator.itemgetter(1), reverse=True)
     return sorted_x
 
-    for x in sorted_x:
-        print x
+    #for x in sorted_x:
+    #    print(x)
 
 
 def full_test():
 
-    query = "select e.id AS activity_id, e.name AS activity_name, te.comments AS comments from(redmine.time_entries te join redmine.enumerations e ON ((te.activity_id = e.id))) order by te.id"
-    cursor =helper.db.cursor()
+    num_samples_per_activity = 10
+    helper.get_services()
+    services_ids = helper.get_services_ids()
+
+    start_issue_weight = 1
+    end_issue_weight = 20
+    start_activity_weight = 1
+    end_activity_weight = 20
+    step = 5
+
+    fn = get_results_file_name()
+    if os.path.isfile(fn):
+        raise Exception("File already exists: " + fn)
+
+    f = open(fn, "w+")
+    done = 1
+
+    total_to_analyze = num_samples_per_activity * (end_activity_weight / step) * (end_activity_weight / step) * len(services_ids)
+
+    for act_id in services_ids:
+        proportions = []
+        entries = get_entries(act_id, num_samples_per_activity)
+
+        if len(entries) < num_samples_per_activity:
+            total_to_analyze -= (num_samples_per_activity - len(entries)) * (end_activity_weight / step) * (end_activity_weight / step)
+
+        for issue_weigth in range(start_issue_weight, end_issue_weight+1, step):
+            for activity_weight in range(start_activity_weight, end_activity_weight+1, step):
+
+                print_done(done, total_to_analyze)
+
+                if activity_weight == 0 and start_activity_weight == 0:
+                    continue
+
+                proportion = float(activity_weight) / float(issue_weigth)
+                if proportion in proportions:
+                    continue
+
+                proportions.append(proportion)
+
+                results = {}
+
+                total = 0
+                correct = 0
+                false = 0
+
+                if len(entries) == 0:
+                    done += 1
+                    continue
+
+                for entry in entries:
+
+                    comments = entry[2]
+                    expected = entry[1]
+
+                    if not expected in results:
+                        results[expected] = [0, 0, 0]
+
+                    res = individual_test(comments, issue_weigth, activity_weight)
+
+                    if res[0][0] == expected:
+                        correct += 1
+                        results[expected][0] += 1
+                    else:
+                        results[expected][1] += 1
+                        false += 1
+
+                    results[expected][2] += 1
+                    total += 1
+
+                    done += 1
+
+                for r in results.items():
+                    f.write(str(proportion) + ":" + str(issue_weigth) + ":" + str(activity_weight)
+                            + str(r[1]) + ":" + str(r[0]) + "\n")
+
+
+    f.close()
+
+
+def get_results_file_name():
+    now = datetime.datetime.now()
+    return "resources/results-" + str(now.day) + "-" + str(now.month) + "-" \
+           + str(now.year) + "-" + str(now.hour) + "-" + str(now.minute) + "-" + str(now.second) + ".dat"
+
+
+def get_entries(activity_id, num_samples_per_activity):
+    random_ids = get_random_id(num_samples_per_activity, activity_id)
+
+    if not random_ids:
+        return False
+
+    query = "select e.id AS activity_id, e.name AS activity_name, te.comments AS comments " \
+            "from(redmine.time_entries te join redmine.enumerations e ON ((te.activity_id = e.id)))"
+
+    query += " WHERE (" + random_ids + ") and activity_id=" + str(activity_id) +\
+             " order by te.id limit " + str(num_samples_per_activity)
+
+    cursor = helper.db.cursor()
     cursor.execute(query)
     entries = cursor.fetchall()
 
-    total = 0
-    correct = 0
-    false = 0
+    return entries
 
-    results = {}
 
-    for s in helper.get_services():
-        results[s] = [0,0,0]
+def print_done(done, total):
 
-    for entry in entries:
-        comments = entry[2]
-        expected = entry[1]
+    new = float(done*100) / float(total)
+    sys.stdout.write("%3f%%\r" % new)
+    sys.stdout.flush()
 
-        res = individual_test(comments)
 
-        print comments
+def get_random_id(max, service_id):
 
-        if res[0][0] == expected:
-            correct += 1
-            results[expected][0] += 1
-        else:
-            results[expected][1] += 1
-            false += 1
+    q = "SELECT id  " \
+        "FROM redmine.time_entries as te " \
+        "where te.activity_id=" + str(service_id)
 
-        results[expected][2] += 1
-        total += 1
+    cursor = helper.db.cursor()
 
-        print "@"*15
-        for r in results:
-            print r + ":" + str(results[r])
+    try:
+        cursor.execute(q)
+    except Exception as e:
+        print(e)
+        print(q)
+        return False
 
-    print "correct:" + str(correct) + "||" + str(float(correct) / float(total))
-    print "false:" + str(false)
-    print "total:" + str(total)
+    result = cursor.fetchall()
+
+    all_ids = []
+
+    for id in result:
+        all_ids.append(id[0])
+
+    random.shuffle(all_ids)
+
+    if len(all_ids) == 0:
+        return False
+
+    if len(all_ids) < max:
+        max = len(all_ids)
+
+    selected = []
+
+    rep = 0
+    if max > 1:
+
+        for i in range(0, max):
+
+            selected.append(str(all_ids[i]))
+
+        s = " OR te.id=".join(selected)
+        s = "te.id=" + s
+
+    else:
+        s = "te.id=" + str(all_ids[0])
+
+    return s
 
 full_test()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

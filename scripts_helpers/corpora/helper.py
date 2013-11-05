@@ -11,6 +11,8 @@ db = MySQLdb.connect(
         db="redmine") # name of the data base
 
 
+field_separator = "[[[[[]]]]]"
+
 class Service:
 
     def __init__(self, id, name):
@@ -37,6 +39,24 @@ def get_services():
             services[s.name] = []
 
         services[s.name].append(s)
+
+    return services
+
+def get_services_ids():
+
+    query_ids = "SELECT e.name, activity_id " \
+                "FROM redmine.time_entries as te, " \
+                "enumerations as e " \
+                "where te.activity_id=e.id group by(activity_id);"
+
+    cursor = db.cursor()
+    cursor.execute(query_ids)
+    res = cursor.fetchall()
+
+    services = []
+
+    for r in res:
+        services.append(r[1])
 
     return services
 

@@ -68,7 +68,7 @@ def generate_weight_dictionary(service, words):
     helper.generate_dictionary_size_file(dictionary)
 
     for w in words:
-        df.write(codecs.decode(w, "unicode_escape") + "\t" + str(words[w]) + "\n")
+        df.write(codecs.decode(w, "unicode_escape") + helper.field_separator + str(words[w]) + "\n")
 
     df.close()
 
@@ -126,7 +126,7 @@ def load_dict(service_name):
     dict = {}
 
     for w in service_words:
-        w = w.split("\t")
+        w = w.split(helper.field_separator)
         dict[w[0]] = w[1][:-1]
 
     return dict
