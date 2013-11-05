@@ -11,6 +11,7 @@ import os
 import multiprocessing
 import time
 
+
 class MultiQuery(multiprocessing.Process):
 
     def __init__(self, query, db, pipe):
@@ -26,6 +27,26 @@ class MultiQuery(multiprocessing.Process):
         self.pipe.close()
 
 
+class ServicesBuffer:
+
+    def __init__(self, act_id, num_samples_per_activity):
+
+        self.services = {}
+        for service_id in helper.get_services_ids():
+            self.services[service_id] = False
+
+        self.act_id = act_id
+        self.num_samples_per_activity = num_samples_per_activity
+
+    def get_entries_for_service(self, service_id):
+
+        if service_id in self.services:
+            return self.services[service_id]
+
+        else:
+            entries = get_entries(self.act_id, self.num_samples_per_activity)
+
+
 def individual_test(to_test, issue_weigth, activity_weight):
 
     s1 = iss.test(to_test)
@@ -36,7 +57,6 @@ def individual_test(to_test, issue_weigth, activity_weight):
         final[s] = issue_weigth*s1[s] + activity_weight*s2[s]
 
     return order_results(final)
-
 
 
 def order_results(final):
@@ -51,7 +71,7 @@ def order_results(final):
 def compute():
 
     num_process = 8
-    num_samples_per_activity = 2
+    num_samples_per_activity = 1000
     helper.get_services()
     services_ids = helper.get_services_ids()
 
@@ -59,19 +79,46 @@ def compute():
     end_issue_weight = 20
     start_activity_weight = 1
     end_activity_weight = 20
-    step = 5
+    step = 1
 
-    total_to_analyze_per_process = num_samples_per_activity * (end_activity_weight / step) \
-        * (end_activity_weight / step) * len(services_ids) / num_process
+    total_to_analyze_per_process = num_samples_per_activity * len(services_ids) * (end_activity_weight / step) \
+        * (end_activity_weight / step) / num_process
+
+    print(total_to_analyze_per_process)
+    permutations = {}
+
+    for issue_weigth in range(start_issue_weight, end_issue_weight+1, step):
+        for activity_weight in range(start_activity_weight, end_activity_weight+1, step):
+
+            proportion = round(float(activity_weight) / float(issue_weigth), 2)
+
+            if proportion in permutations:
+                continue
+
+            permutations[proportion] = (proportion, activity_weight, issue_weigth)
+
+    assign = []
+
+    i = 0
+    j = 1
+    for perm in permutations.values():
+
+        if i >= round(len(permutations) * j / num_process):
+
+            assign_permutations(assign)
+            j += 1
+            assign = []
+
+        assign.append(perm)
+
+        i += 1
+
+    assign_permutations(assign)
 
 
-
-    fn = get_results_file_name()
-    if os.path.isfile(fn):
-        raise Exception("File already exists: " + fn)
-
-    f = open(fn, "w+")
-    done = 1
+def assign_permutations(permutations):
+    print(permutations)
+    print("-"*85)
 
 
 def full_test():
@@ -235,7 +282,8 @@ def get_random_id(max, service_id):
 
     return s
 
-full_test()
+#full_test()
+compute()
 
 
 
