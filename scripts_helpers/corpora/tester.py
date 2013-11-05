@@ -50,7 +50,7 @@ def order_results(final):
 
 def full_test():
 
-    num_samples_per_activity = 2
+    num_samples_per_activity = 5
     helper.get_services()
     services_ids = helper.get_services_ids()
 
@@ -58,7 +58,7 @@ def full_test():
     end_issue_weight = 20
     start_activity_weight = 1
     end_activity_weight = 20
-    step = 5
+    step = 2
 
     fn = get_results_file_name()
     if os.path.isfile(fn):
