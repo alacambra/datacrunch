@@ -8,6 +8,22 @@ import helper
 import random
 import sys
 import os
+import multiprocessing
+
+class MultiQuery(multiprocessing.Process):
+
+    def __init__(self, query, db, pipe):
+        self.query = query
+        self.db = db
+        self.pipe = pipe
+        super(MultiQuery, self).__init__()
+
+    def run(self):
+        cur = self.db.cursor()
+        q = cur.execute(self.query)
+        self.pipe.send(cur.fetchall())
+        self.pipe.close()
+
 
 def individual_test(to_test, issue_weigth, activity_weight):
 
@@ -33,7 +49,7 @@ def order_results(final):
 
 def full_test():
 
-    num_samples_per_activity = 10
+    num_samples_per_activity = 1000
     helper.get_services()
     services_ids = helper.get_services_ids()
 
@@ -41,7 +57,7 @@ def full_test():
     end_issue_weight = 20
     start_activity_weight = 1
     end_activity_weight = 20
-    step = 5
+    step = 1
 
     fn = get_results_file_name()
     if os.path.isfile(fn):
