@@ -48,6 +48,32 @@ def order_results(final):
     #    print(x)
 
 
+def compute():
+
+    num_process = 8
+    num_samples_per_activity = 2
+    helper.get_services()
+    services_ids = helper.get_services_ids()
+
+    start_issue_weight = 1
+    end_issue_weight = 20
+    start_activity_weight = 1
+    end_activity_weight = 20
+    step = 5
+
+    total_to_analyze_per_process = num_samples_per_activity * (end_activity_weight / step) \
+        * (end_activity_weight / step) * len(services_ids) / num_process
+
+
+
+    fn = get_results_file_name()
+    if os.path.isfile(fn):
+        raise Exception("File already exists: " + fn)
+
+    f = open(fn, "w+")
+    done = 1
+
+
 def full_test():
 
     num_samples_per_activity = 2
