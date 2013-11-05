@@ -9,6 +9,7 @@ import random
 import sys
 import os
 import multiprocessing
+import time
 
 class MultiQuery(multiprocessing.Process):
 
@@ -49,7 +50,7 @@ def order_results(final):
 
 def full_test():
 
-    num_samples_per_activity = 1000
+    num_samples_per_activity = 2
     helper.get_services()
     services_ids = helper.get_services_ids()
 
@@ -57,7 +58,7 @@ def full_test():
     end_issue_weight = 20
     start_activity_weight = 1
     end_activity_weight = 20
-    step = 1
+    step = 5
 
     fn = get_results_file_name()
     if os.path.isfile(fn):
@@ -75,6 +76,7 @@ def full_test():
         if len(entries) < num_samples_per_activity:
             total_to_analyze -= (num_samples_per_activity - len(entries)) * (end_activity_weight / step) * (end_activity_weight / step)
 
+        uid = time.time()
         for issue_weigth in range(start_issue_weight, end_issue_weight+1, step):
             for activity_weight in range(start_activity_weight, end_activity_weight+1, step):
 
@@ -124,7 +126,6 @@ def full_test():
                 for r in results.items():
                     f.write(str(proportion) + ":" + str(issue_weigth) + ":" + str(activity_weight)
                             + str(r[1]) + ":" + str(r[0]) + "\n")
-
 
     f.close()
 
