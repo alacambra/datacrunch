@@ -190,9 +190,6 @@ def compute():
 
     num_process = 8
     num_samples_per_activity = 2
-    num_samples_per_activity = 5
-    helper.get_services()
-    services_ids = helper.get_services_ids()
 
     start_issue_weight = 1
     end_issue_weight = 20
