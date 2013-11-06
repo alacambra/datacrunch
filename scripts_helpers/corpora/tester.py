@@ -11,6 +11,7 @@ import os
 import multiprocessing
 import time
 from multiprocessing import Pipe
+import cStringIO as cstr
 
 
 class TestSet(multiprocessing.Process):
@@ -37,7 +38,7 @@ class TestSet(multiprocessing.Process):
         activity_weight_col = 2
 
         results = {}
-
+        s = cstr.StringIO()
         for permutation in self.permutations:
 
             correct = 0
@@ -55,13 +56,24 @@ class TestSet(multiprocessing.Process):
 
                     expected = entry[service_name_col]
 
-                    s = entry[service_name_col] + helper.field_separator + str(permutation[issue_weigth_col]) + \
-                        helper.field_separator + str(permutation[activity_weight_col]) + helper.field_separator
+                    s.write(entry[service_name_col])
+                    s.write(helper.field_separator)
+                    s.write(str(permutation[issue_weigth_col]))
+                    s.write(helper.field_separator)
+                    s.write(str(permutation[activity_weight_col]))
+                    s.write(helper.field_separator)
+
+                    #s += entry[service_name_col] + helper.field_separator + str(permutation[issue_weigth_col]) + \
+                    #    helper.field_separator + str(permutation[activity_weight_col]) + helper.field_separator
 
                     if res[0][0] == expected:
-                        f.write(s + "1" + "\n")
+                        #s += "1\n"
+                        s.write("1\n")
+                        #f.write(s + "1" + "\n")
                     else:
-                        f.write(s + "0" + "\n")
+                        #s += "0\n"
+                        s.write("0\n")
+                        #f.write(s + "0" + "\n")
 
                     total += 1
 
@@ -69,6 +81,7 @@ class TestSet(multiprocessing.Process):
                         total = 0
                         self.pipe.send(10)
 
+        f.write(s)
         self.pipe.send(total)
         self.pipe.close()
         f.close()
@@ -182,13 +195,13 @@ def order_results(final):
 def compute():
 
     num_process = 8
-    num_samples_per_activity = 100
+    num_samples_per_activity = 10
 
     start_issue_weight = 1
     end_issue_weight = 20
     start_activity_weight = 1
     end_activity_weight = 20
-    step = 4
+    step = 5
 
     service_buffer = ServicesBuffer(num_samples_per_activity)
 
