@@ -63,17 +63,10 @@ class TestSet(multiprocessing.Process):
                     s.write(str(permutation[activity_weight_col]))
                     s.write(helper.field_separator)
 
-                    #s += entry[service_name_col] + helper.field_separator + str(permutation[issue_weigth_col]) + \
-                    #    helper.field_separator + str(permutation[activity_weight_col]) + helper.field_separator
-
                     if res[0][0] == expected:
-                        #s += "1\n"
                         s.write("1\n")
-                        #f.write(s + "1" + "\n")
                     else:
-                        #s += "0\n"
                         s.write("0\n")
-                        #f.write(s + "0" + "\n")
 
                     total += 1
 
@@ -81,10 +74,11 @@ class TestSet(multiprocessing.Process):
                         total = 0
                         self.pipe.send(10)
 
-        f.write(s)
+        f.write(s.getvalue())
         self.pipe.send(total)
         self.pipe.close()
         f.close()
+
 
 class PrinerProcess(multiprocessing.Process):
 
@@ -195,7 +189,7 @@ def order_results(final):
 def compute():
 
     num_process = 8
-    num_samples_per_activity = 10
+    num_samples_per_activity = 2
 
     start_issue_weight = 1
     end_issue_weight = 20
@@ -225,6 +219,7 @@ def compute():
     i = 0
     j = 1
     ordianl = 0
+    ordinals = []
     test_set_list = TestSetList()
     printer_connections = []
 
@@ -235,6 +230,7 @@ def compute():
             printer_conn, subprocess_conn = Pipe()
             printer_connections.append(printer_conn)
             test_set_list.add_testset_and_start(assign_permutations(assign, service_buffer, ordianl, subprocess_conn))
+            ordinals.append(ordianl)
             ordianl += 1
             j += 1
             assign = []
@@ -250,8 +246,43 @@ def compute():
     PrinerProcess(total_to_analyze, printer_connections, printer_conn).start()
     test_set_list.wait_for_test_ready()
     main_process_conn.send("ready")
-    print("ready")
 
+
+def summarize_results(ordinals):
+
+    service_col = 0
+    issue_weigth_col = 1
+    activity_weight_col = 2
+    result_col = 3
+    rf = open("results/" + "results.dat")
+    results = {}
+
+    for ordinal in ordinals:
+
+        f = open("tmp/" + str(os.getpid()) + str(ordinal) + ".tmp", "r+")
+
+        for line in f.readlines().split("\n"):
+
+            result_line = line.split(helper.field_separator)
+
+            if not line[service_col] in results:
+                result_line[line[service_col]] = {}
+
+            r = results[line[service_col]]
+
+            if not line[issue_weigth_col] in r:
+                r[line[issue_weigth_col]] = {}
+
+            r = r[line[issue_weigth_col]]
+
+            if not line[activity_weight_col] in r:
+                r[line[activity_weight_col]] = []
+
+            r = r[line[activity_weight_col]]
+            r[0] += r[0]
+            r[1] += 1
+
+        s = cstr.StringIO()
 
 def assign_permutations(permutations, service_buffer, ordinal, child_conn):
     return TestSet(
