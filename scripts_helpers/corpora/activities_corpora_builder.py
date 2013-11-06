@@ -84,9 +84,9 @@ def generate_dicts():
     helper.generate_dictionary_size_file(dictionary)
 
 
-def test(s):
+def test(s, services):
 
-    services = helper.get_services()
+    #services = helper.get_services()
 
     scores = {}
     s = s.lower()
@@ -95,7 +95,6 @@ def test(s):
     for service in services:
 
         service_words = load_dict(service)
-
         if not service_words:
             continue
 

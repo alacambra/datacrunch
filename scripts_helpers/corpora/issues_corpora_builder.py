@@ -87,9 +87,9 @@ def get_total_services_time():
     return times
 
 
-def test(s):
+def test(s, services):
 
-    services = helper.get_services()
+    #services = helper.get_services()
     scores = {}
     s = s.lower()
 
