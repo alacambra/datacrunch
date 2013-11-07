@@ -147,7 +147,6 @@ def generate_dictionary_size_file(dictionary):
         f.close()
 
     for service in lengths:
-        print(service)
         weight = float(lengths[service]) / float(total_length)*100
         sf.write(service + "\t" + str(length) + "\t" + str(weight) + "\n")
 

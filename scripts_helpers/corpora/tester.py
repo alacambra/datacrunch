@@ -199,13 +199,13 @@ def order_results(final):
 
 def compute():
 
-    num_process = 8
-    num_samples_per_activity = 10
+    num_process = 20
+    num_samples_per_activity = 100
 
     start_issue_weight = 1
-    end_issue_weight = 10
+    end_issue_weight = 15
     start_activity_weight = 1
-    end_activity_weight = 10
+    end_activity_weight = 15
     step = 3
 
     service_buffer = ServicesBuffer(num_samples_per_activity)

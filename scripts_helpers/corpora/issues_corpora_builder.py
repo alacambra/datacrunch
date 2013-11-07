@@ -65,10 +65,11 @@ def get_words():
 def generate_weight_dictionary(service, words):
 
     df = codecs.open(dictionary.get_dict_service_file_name(service), "w+", "utf8");
-    helper.generate_dictionary_size_file(dictionary)
 
     for w in words:
         df.write(codecs.decode(w, "unicode_escape") + helper.field_separator + str(words[w]) + "\n")
+
+    helper.generate_dictionary_size_file(dictionary)
 
     df.close()
 
