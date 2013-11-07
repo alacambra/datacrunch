@@ -26,6 +26,14 @@ class TestSet(multiprocessing.Process):
 
         super(TestSet, self).__init__()
 
+    def is_successfull(self, result, expected):
+
+        for i in range(0, 5):
+            if result[i][0] == expected:
+                return True
+
+        return False
+
     def run(self):
 
         f = open("results/tmp/" + str(self._parent_pid) + "/" + str(self.ordinal) + ".tmp", "w+")
@@ -66,7 +74,7 @@ class TestSet(multiprocessing.Process):
                     s.write(str(permutation[activity_weight_col]))
                     s.write(helper.field_separator)
 
-                    if res[0][0] == expected:
+                    if self.is_successfull(res, expected):
                         s.write("1\n")
                     else:
                         s.write("0\n")
@@ -83,7 +91,7 @@ class TestSet(multiprocessing.Process):
         f.close()
 
 
-class PrinerProcess(multiprocessing.Process):
+class PrinterProcess(multiprocessing.Process):
 
     def __init__(self, total, pipes_counter, pipe_finish):
 
@@ -92,7 +100,7 @@ class PrinerProcess(multiprocessing.Process):
         self.total = total
         self.partial = 0
 
-        super(PrinerProcess, self).__init__()
+        super(PrinterProcess, self).__init__()
 
     def run(self):
         while not self.pipe_finish.poll(0.1):
@@ -176,7 +184,7 @@ def individual_test(to_test, issue_weigth, activity_weight, services_dicts):
     s1 = iss.test(to_test, services_dicts)
     s2 = act.test(to_test, services_dicts)
     final = {}
-
+    print(s1)
     for s in s1:
         final[s] = issue_weigth*s1[s] + activity_weight*s2[s]
 
@@ -191,14 +199,14 @@ def order_results(final):
 
 def compute():
 
-    num_process = 16
-    num_samples_per_activity = 100
+    num_process = 8
+    num_samples_per_activity = 10
 
     start_issue_weight = 1
-    end_issue_weight = 100
+    end_issue_weight = 10
     start_activity_weight = 1
-    end_activity_weight = 100
-    step = 10
+    end_activity_weight = 10
+    step = 3
 
     service_buffer = ServicesBuffer(num_samples_per_activity)
 
@@ -246,7 +254,7 @@ def compute():
     test_set_list.add_testset_and_start(assign_permutations(assign, service_buffer, ordianl, subprocess_conn))
 
     main_process_conn, printer_conn = Pipe()
-    PrinerProcess(total_to_analyze, printer_connections, printer_conn).start()
+    PrinterProcess(total_to_analyze, printer_connections, printer_conn).start()
     test_set_list.wait_for_test_ready()
     main_process_conn.send("ready")
     summarize_results(ordinals)
@@ -399,9 +407,9 @@ def print_done(done, total):
 compute()
 
 
-
-
-
+#service_buffer = ServicesBuffer(40)
+#for a in individual_test("Neues HTML-Template erstellen", 1, 1000, service_buffer.get_services()):
+#    print(a)
 
 
 

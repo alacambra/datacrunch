@@ -1,9 +1,7 @@
-import helper
 import re
 import matplotlib.pyplot as plt
-import operator
-import math
 import os
+import codecs
 import time
 
 
@@ -39,20 +37,22 @@ class ResultsReader:
 
             plt.grid(True)
             plt.title(service)
-            plt.axis([0, 10, 0, 100])
+            #plt.axis([0, 10, 0, 100])
             plt.xlabel("activity_weigth / issue_weight")
             plt.ylabel("perfect matches(% over " + str(self.results[service][0].total) + ")")
 
             try:
-                plt.savefig(self.img_directory + service + ".png")
-            except Exception:
+                plt.savefig(self.img_directory + codecs.encode(service.replace("/", "_"), "utf8") + ".png")
+            except Exception as e:
+                print service
+                print e
                 continue
 
             plt.close()
 
     def load_results(self):
 
-        f = open(self.results_file, "r+")
+        f = codecs.open(self.results_file, "r+", encoding="latin1")
 
         for l in f.readlines():
             r = Result(l)
@@ -82,6 +82,6 @@ class Result():
                "\ntotal:" + self.total + \
                "\nresult:" + str(self.result)
 
-print ResultsReader("results/results_18875_-7-11-2013_11_39-41.dat")
+ResultsReader("results/results_25236_-7-11-2013_17_21-22.dat")
 #plt.plot([1,3,2,5,4], [4,67,3,5,1])
 #plt.show()

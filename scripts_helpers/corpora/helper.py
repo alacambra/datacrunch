@@ -100,7 +100,9 @@ class Dictionary:
         self.dict_folder_name = dict_folder_name
 
     def get_dict_service_file_name(self, service):
-        return self.get_dict_directory() + service.replace("/", "-").lower() + ".dict"
+        service = codecs.decode(service.replace("/", "_"), "unicode_escape")
+        service = codecs.encode(service, "utf8").lower()
+        return self.get_dict_directory() + service + ".dict"
 
     def get_dict_directory(self):
         return "dicts/" + self.dict_folder_name + "/"
@@ -145,6 +147,7 @@ def generate_dictionary_size_file(dictionary):
         f.close()
 
     for service in lengths:
+        print(service)
         weight = float(lengths[service]) / float(total_length)*100
         sf.write(service + "\t" + str(length) + "\t" + str(weight) + "\n")
 
