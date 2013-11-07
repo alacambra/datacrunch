@@ -12,6 +12,8 @@ db = MySQLdb.connect(
 
 
 field_separator = "[[[[[]]]]]"
+results_field_separator = "\t\t"
+
 
 class Service:
 

@@ -28,7 +28,7 @@ class TestSet(multiprocessing.Process):
 
     def run(self):
 
-        f = open("tmp/" + str(self._parent_pid) + "/" + str(self.ordinal) + ".tmp", "w+")
+        f = open("results/tmp/" + str(self._parent_pid) + "/" + str(self.ordinal) + ".tmp", "w+")
 
         service_id_col = 0
         service_name_col = 1
@@ -39,6 +39,9 @@ class TestSet(multiprocessing.Process):
 
         results = {}
         s = cstr.StringIO()
+
+        total = 0
+
         for permutation in self.permutations:
 
             correct = 0
@@ -188,19 +191,19 @@ def order_results(final):
 
 def compute():
 
-    num_process = 8
-    num_samples_per_activity = 2
+    num_process = 16
+    num_samples_per_activity = 100
 
     start_issue_weight = 1
-    end_issue_weight = 20
+    end_issue_weight = 100
     start_activity_weight = 1
-    end_activity_weight = 20
-    step = 2
+    end_activity_weight = 100
+    step = 10
 
     service_buffer = ServicesBuffer(num_samples_per_activity)
 
     permutations = {}
-    os.mkdir("tmp/" + str(os.getpid()))
+    os.mkdir("results/tmp/" + str(os.getpid()))
 
     for issue_weigth in range(start_issue_weight, end_issue_weight+1, step):
         for activity_weight in range(start_activity_weight, end_activity_weight+1, step):
@@ -246,6 +249,7 @@ def compute():
     PrinerProcess(total_to_analyze, printer_connections, printer_conn).start()
     test_set_list.wait_for_test_ready()
     main_process_conn.send("ready")
+    summarize_results(ordinals)
 
 
 def summarize_results(ordinals):
@@ -254,19 +258,19 @@ def summarize_results(ordinals):
     issue_weigth_col = 1
     activity_weight_col = 2
     result_col = 3
-    rf = open("results/" + "results.dat")
+    rf = open(get_results_file_name(), "w+")
     results = {}
 
     for ordinal in ordinals:
 
-        f = open("tmp/" + str(os.getpid()) + str(ordinal) + ".tmp", "r+")
+        f = open("results/tmp/" + str(os.getpid()) + "/" + str(ordinal) + ".tmp", "r+")
 
-        for line in f.readlines().split("\n"):
-
-            result_line = line.split(helper.field_separator)
+        for line in f.readlines():
+            line = line[:-1]
+            line = line.split(helper.field_separator)
 
             if not line[service_col] in results:
-                result_line[line[service_col]] = {}
+                results[line[service_col]] = {}
 
             r = results[line[service_col]]
 
@@ -277,12 +281,32 @@ def summarize_results(ordinals):
 
             if not line[activity_weight_col] in r:
                 r[line[activity_weight_col]] = []
+                r[line[activity_weight_col]].append(0)
+                r[line[activity_weight_col]].append(0)
 
             r = r[line[activity_weight_col]]
-            r[0] += r[0]
+            r[0] += int(line[result_col])
             r[1] += 1
 
-        s = cstr.StringIO()
+    for service in results:
+        for p_iss_w in results[service]:
+            for p_act_w in results[service][p_iss_w]:
+                s = cstr.StringIO()
+                s.write(service)
+                s.write(helper.results_field_separator)
+                s.write(p_iss_w)
+                s.write(helper.results_field_separator)
+                s.write(p_act_w)
+                s.write(helper.results_field_separator)
+                s.write(str(results[service][p_iss_w][p_act_w][1]))
+                s.write(helper.results_field_separator)
+                s.write(str(results[service][p_iss_w][p_act_w][0]))
+                s.write("\n")
+                rf.write(s.getvalue())
+                s.close()
+
+    rf.close()
+
 
 def assign_permutations(permutations, service_buffer, ordinal, child_conn):
     return TestSet(
@@ -295,8 +319,8 @@ def assign_permutations(permutations, service_buffer, ordinal, child_conn):
 
 def get_results_file_name():
     now = datetime.datetime.now()
-    return "resources/results-" + str(now.day) + "-" + str(now.month) + "-" \
-           + str(now.year) + "-" + str(now.hour) + "-" + str(now.minute) + "-" + str(now.second) + ".dat"
+    return "results/results_" + str(os.getpid()) + "_-" + str(now.day) + "-" + str(now.month) + "-" \
+           + str(now.year) + "_" + str(now.hour) + "_" + str(now.minute) + "-" + str(now.second) + ".dat"
 
 
 def get_entries(activity_id, num_samples_per_activity):
@@ -316,13 +340,6 @@ def get_entries(activity_id, num_samples_per_activity):
     entries = cursor.fetchall()
 
     return entries
-
-
-def print_done(done, total):
-
-    new = float(done*100) / float(total)
-    sys.stdout.write("%3f%%\r" % new)
-    sys.stdout.flush()
 
 
 def get_random_id(max, service_id):
@@ -371,6 +388,13 @@ def get_random_id(max, service_id):
         s = "te.id=" + str(all_ids[0])
 
     return s
+
+
+def print_done(done, total):
+
+    new = float(done*100) / float(total)
+    sys.stdout.write("%3f%%\r" % new)
+    sys.stdout.flush()
 
 compute()
 
