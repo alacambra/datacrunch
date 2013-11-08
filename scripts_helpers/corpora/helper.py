@@ -19,7 +19,7 @@ class Service:
 
     def __init__(self, id, name):
         self.id = id
-        self.name = name
+        self.name = prepare_service_name_for_use(name)
 
     def __str__(self):
         return str(id) + ":" + self.name
@@ -43,6 +43,7 @@ def get_services():
         services[s.name].append(s)
 
     return services
+
 
 def get_services_ids():
 
@@ -87,7 +88,7 @@ def word_is_valid(w):
 
 def get_stop_words():
 
-    stop_words = codecs.open("resources/stop-words-de.txt", "r", "utf8")
+    stop_words = codecs.open("../resources/stop-words-de.txt", "r", "utf8")
     stop_words = codecs.encode(stop_words.read(), "unicode_escape")
     stop_words = stop_words.split("\\n")
 
@@ -100,12 +101,10 @@ class Dictionary:
         self.dict_folder_name = dict_folder_name
 
     def get_dict_service_file_name(self, service):
-        service = codecs.decode(service.replace("/", "_"), "unicode_escape")
-        service = codecs.encode(service, "utf8").lower()
         return self.get_dict_directory() + service + ".dict"
 
     def get_dict_directory(self):
-        return "dicts/" + self.dict_folder_name + "/"
+        return "../dicts/" + self.dict_folder_name + "/"
 
     def get_dict_length(self, service):
         d = open(self.get_dict_service_file_name(service))
@@ -152,6 +151,11 @@ def generate_dictionary_size_file(dictionary):
 
     sf.close()
 
+
+def prepare_service_name_for_use(service):
+    service = codecs.decode(service.replace("/", "_"), "unicode_escape")
+    service = codecs.encode(service, "utf8").lower()
+    return service
 
 
 

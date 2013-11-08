@@ -2,16 +2,15 @@
 from __future__ import print_function
 import operator
 import datetime
-import issues_corpora_builder as iss
-import activities_corpora_builder as act
-import helper
 import random
 import sys
 import os
 import multiprocessing
-import time
 from multiprocessing import Pipe
 import cStringIO as cstr
+
+import helper
+from scripts_helpers.corpora.dicts_builders import issues_corpora_builder as iss
 
 
 class TestSet(multiprocessing.Process):
@@ -67,7 +66,7 @@ class TestSet(multiprocessing.Process):
 
                     expected = entry[service_name_col]
 
-                    s.write(entry[service_name_col])
+                    s.write(helper.prepare_service_name_for_use(entry[service_name_col]))
                     s.write(helper.field_separator)
                     s.write(str(permutation[issue_weigth_col]))
                     s.write(helper.field_separator)
@@ -135,20 +134,20 @@ class ServicesBuffer:
         for service_id in ids:
 
             self.services[service_id] = get_entries(service_id, self.num_samples_per_activity)
-            service_name = self.services[service_id][0][1]
+            service_name = helper.prepare_service_name_for_use(self.services[service_id][0][1])
 
             if service_name not in self.services_names:
                 self.services_names.append(service_name)
 
-    def get_entries_for_service(self, service_id):
-
-        if service_id in self.services:
-            return self.services[service_id]
-
-        else:
-            entries = get_entries(service_id, self.num_samples_per_activity)
-            self.services[service_id] = entries
-            return self.entries
+    #def get_entries_for_service(self, service_id):
+    #
+    #    if service_id in self.services:
+    #        return self.services[service_id]
+    #
+    #    else:
+    #        entries = get_entries(service_id, self.num_samples_per_activity)
+    #        self.services[service_id] = entries
+    #        return self.entries
 
     def get_entries(self):
         return self.services
@@ -181,12 +180,11 @@ class TestSetList:
 
 def individual_test(to_test, issue_weigth, activity_weight, services_dicts):
 
-    s1 = iss.test(to_test, services_dicts)
-    s2 = act.test(to_test, services_dicts)
+    services_issues_res= iss.test(to_test, services_dicts)
+    services_activity_res = act.test(to_test, services_dicts)
     final = {}
-    print(s1)
-    for s in s1:
-        final[s] = issue_weigth*s1[s] + activity_weight*s2[s]
+    for service in services_issues_res:
+        final[service] = issue_weigth*services_issues_res[service] + activity_weight*services_activity_res[service]
 
     return order_results(final)
 
@@ -199,14 +197,14 @@ def order_results(final):
 
 def compute():
 
-    num_process = 20
-    num_samples_per_activity = 100
+    num_process = 8
+    num_samples_per_activity = 10
 
     start_issue_weight = 1
-    end_issue_weight = 15
+    end_issue_weight = 10
     start_activity_weight = 1
-    end_activity_weight = 15
-    step = 3
+    end_activity_weight = 10
+    step = 5
 
     service_buffer = ServicesBuffer(num_samples_per_activity)
 
@@ -322,7 +320,7 @@ def assign_permutations(permutations, service_buffer, ordinal, child_conn):
         permutations,
         child_conn,
         ordinal,
-        service_buffer.get_services())
+        service_buffer.get_services_as_tupples())
 
 
 def get_results_file_name():

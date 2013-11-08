@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
-import helper
 import codecs
-from helper import Dictionary
+import scripts_helpers.corpora.helper as helper
+from scripts_helpers.corpora.helper import Dictionary
+from scripts_helpers.corpora.redmine_services_provider import RedmineServicesProvider
+
 
 dictionary = Dictionary("from_issues")
-
+service_provider = RedmineServicesProvider()
 
 def generate_dicts():
     get_words()
@@ -15,22 +17,31 @@ def get_words():
 
     query = "SELECT invested_time, subject FROM activities_by_issue where activity_id = "
     stop_words = helper.get_stop_words()
-    services = helper.get_services()
+
+    services = service_provider.get_services_as_tupples()
 
     services_dict = {}
     times = get_total_services_time()
 
     for service in services:
-        if service in services_dict:
+
+        service_name = service[RedmineServicesProvider.name_col]
+        service_id = service[RedmineServicesProvider.id_col]
+
+        if service_name in services_dict:
             continue
 
         q = query
-        print "analysing for " + service + 50*"-"
 
-        for s in services[service]:
-            q = q + str(s.id) + " OR activity_id = "
+        print "analysing for " + service_name + 50*"-"
 
-        q = q[0:-len(" OR activity_id = ")]
+        ids = [str(i) for i in service_provider.get_all_ids_for_service(service_name)]
+
+        if len(ids) > 1:
+            q += " OR activity_id = ".join(ids)
+        else:
+            q += str(service_id)
+
         cursor = helper.db.cursor()
         cursor.execute(q)
         entries = cursor.fetchall()
@@ -42,11 +53,15 @@ def get_words():
 
         for entry in entries:
 
-            current_score = entry[0] / times[service] * 100
+            #the query view already groups the activity by name and not by id
+            if service_id not in times:
+                continue
+
+            current_score = entry[0] / times[service_id] * 100
 
             subject = entry[1]
             subject = codecs.decode(subject, "latin1").lower()
-            subject = codecs.encode(subject, "unicode_escape")
+            subject = codecs.encode(subject, "utf8")
 
             for w in subject.split(" "):
                 if w not in stop_words:
@@ -59,15 +74,17 @@ def get_words():
                     if helper.word_is_valid(w):
                         to_analyze[w] = current_score
 
-        generate_weight_dictionary(service, to_analyze)
+        generate_weight_dictionary(service_name, to_analyze)
 
 
 def generate_weight_dictionary(service, words):
 
-    df = codecs.open(dictionary.get_dict_service_file_name(service), "w+", "utf8");
+    #df = codecs.open(dictionary.get_dict_service_file_name(service), "w+", "utf8");
+    df = open(dictionary.get_dict_service_file_name(service), "w+")
 
     for w in words:
-        df.write(codecs.decode(w, "unicode_escape") + helper.field_separator + str(words[w]) + "\n")
+        #df.write(codecs.decode(w, "unicode_escape") + helper.field_separator + str(words[w]) + "\n")
+        df.write(w + helper.field_separator + str(words[w]) + "\n")
 
     helper.generate_dictionary_size_file(dictionary)
 
@@ -76,21 +93,20 @@ def generate_weight_dictionary(service, words):
 
 def get_total_services_time():
 
-    total_activity_time_query = "SELECT * FROM total_activity_time"
+    total_activity_time_query = "SELECT activity_id, activity, total FROM total_activity_time"
     cursor = helper.db.cursor()
     cursor.execute(total_activity_time_query)
     entries = cursor.fetchall()
     times = {}
 
     for entry in entries:
-        times[entry[1]] = entry[2]
+        times[entry[0]] = entry[2]
 
     return times
 
 
 def test(s, services):
 
-    #services = helper.get_services()
     scores = {}
     s = s.lower()
 
@@ -101,6 +117,7 @@ def test(s, services):
         service_words = load_dict(service)
 
         if not service_words:
+            print "no words for services " + service
             continue
 
         dict_weight = dict_weights[service]
@@ -132,13 +149,7 @@ def load_dict(service_name):
 
     return dict
 
-
-
-
-
-
-
-
+generate_dicts()
 
 
 

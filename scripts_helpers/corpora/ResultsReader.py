@@ -82,6 +82,6 @@ class Result():
                "\ntotal:" + self.total + \
                "\nresult:" + str(self.result)
 
-ResultsReader("results/results_25236_-7-11-2013_17_21-22.dat")
+ResultsReader("results/results_30293_-8-11-2013_2_13-28.dat")
 #plt.plot([1,3,2,5,4], [4,67,3,5,1])
 #plt.show()

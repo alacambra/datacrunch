@@ -5,32 +5,38 @@ from nltk.probability import FreqDist
 import MySQLdb
 import codecs
 import os.path
-import helper
-from helper import Dictionary
+import scripts_helpers.corpora.helper as helper
+from scripts_helpers.corpora.helper import Dictionary
 import math
+from scripts_helpers.corpora.redmine_services_provider import RedmineServicesProvider
 
 dictionary = Dictionary("from_comments")
+
 
 def get_words():
 
     query = "SELECT comments FROM comments_with_activity where activity_id = "
     stop_words = helper.get_stop_words()
-    services = helper.get_services()
+    services = RedmineServicesProvider().get_services_as_tupples()
 
     services_dict = {}
 
     for service in services:
 
-        if service in services_dict:
-            continue
+        service_name = service[RedmineServicesProvider.name_col]
+        service_id = service[RedmineServicesProvider.id_col]
+
+        #if service_name in services_dict:
+        #    continue
 
         q = query
-        print "analysing for " + service + 50*"-"
+        print "analysing for " + service_name + 50*"-"
 
-        for s in services[service]:
-            q = q + str(s.id) + " OR activity_id = "
-
-        q = q[0:-len(" OR activity_id = ")]
+        q += str(service_id)
+        #for s in services[service]:
+        #    q = q + str(s.id) + " OR activity_id = "
+        #
+        #q = q[0:-len(" OR activity_id = ")]
         cursor = helper.db.cursor()
 
         cursor.execute(q)
@@ -43,50 +49,47 @@ def get_words():
         for text in txt:
             text = text[0]
             text = codecs.decode(text, "latin1").lower()
-            text = codecs.encode(text, "unicode_escape")
+            text = codecs.encode(text, "utf8")
             for w in text.split(" "):
                 if w not in stop_words:
                     w = helper.clean_word(w)
 
-
                     if helper.word_is_valid(w):
                         to_analyze.append(w)
 
-        services_dict[service] = to_analyze
+        if service_name in services_dict:
+            services_dict[service_name] += to_analyze
+        else:
+            services_dict[service_name] = to_analyze
 
     return services_dict
 
 
 def generate_weight_dictionary(service, words):
 
-    df = codecs.open(dictionary.get_dict_service_file_name(service), "w+", "utf8");
-
-    services_dict = {}
-    services_dict[service] = words
+    df = open(dictionary.get_dict_service_file_name(service), "w+")
 
     t = Text(words)
-    f = FreqDist(t)
+    freq_dist = FreqDist(t)
 
-    for w in f:
-        weight = 100 * f.freq(w)
-        df.write(codecs.decode(w, "unicode_escape") + helper.field_separator + str(weight) + "\n")
-
+    for w in freq_dist:
+        weight = 100 * freq_dist.freq(w)
+        df.write(w + helper.field_separator + str(weight) + "\n")
 
     df.close()
 
 
 def generate_dicts():
-    all = get_words()
 
-    for service in all:
-        generate_weight_dictionary(service.replace("/", "-").lower(), all[service])
+    all_services_words = get_words()
+
+    for service in all_services_words:
+        generate_weight_dictionary(service.replace("/", "-").lower(), all_services_words[service])
 
     helper.generate_dictionary_size_file(dictionary)
 
 
 def test(s, services):
-
-    #services = helper.get_services()
 
     scores = {}
     s = s.lower()
@@ -138,17 +141,7 @@ def load_dict(service_name):
     return dict
 
 
-
-
-
-
-
-
-
-
-
-
-
+generate_dicts()
 
 
 
