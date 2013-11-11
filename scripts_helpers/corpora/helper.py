@@ -2,6 +2,10 @@ import os
 import re
 import MySQLdb
 import codecs
+from scripts_helpers.corpora.config_loader import ConfigReader
+from scripts_helpers.corpora.redmine_services_provider import RedmineServicesProvider
+
+import sys
 
 
 db = MySQLdb.connect(
@@ -65,6 +69,8 @@ results_field_separator = "\t\t"
 
 class WordHelper:
 
+    word_dot_replacement = "iamadot"
+
     def __init__(self, cr):
         """
         @type cr: ConfigReader
@@ -72,11 +78,12 @@ class WordHelper:
         self.cr = cr
         self.word_dot_replacement = "iamadot"
 
-    def clean_word(self, w):
+    @staticmethod
+    def clean_word(w):
         w = w.strip()
-        w = w.replace(".", self.word_dot_replacement)
+        w = w.replace(".", WordHelper.word_dot_replacement)
         w = re.sub("^\W*(\w+[^\w]*\w+)+\W*$", r"\1", w)
-        w = w.replace(self.word_dot_replacement, ".")
+        w = w.replace(WordHelper.word_dot_replacement, ".")
 
         if len(w) > 0 and w[-1] == ".":
             w = w[:-1]
@@ -103,12 +110,17 @@ class WordHelper:
 
 class Dictionary:
 
-    def __init__(self, cr, dictionary_name):
+    def __init__(self, cr, dictionary_name, service_provider):
         """
         @type cr: ConfigReader
+        @type service_provider:RedmineServicesProvider
         """
         self.dict_folder_name = cr.get_property("dicts_dir")
         self.dictionary_name = dictionary_name
+        self.service_provider = service_provider
+
+        if not os.path.isdir(self.get_dict_directory()):
+            os.mkdir(self.get_dict_directory())
 
     def get_dict_service_file_name(self, service):
         return self.get_dict_directory() + service + ".dict"
@@ -137,29 +149,28 @@ class Dictionary:
 
         return d
 
+    def generate_dictionary_size_file(self):
 
-#def generate_dictionary_size_file(dictionary):
-#
-#    sf = open(dictionary.get_dict_directory() + "dicts_weight.dat", "w+")
-#
-#    lengths = {}
-#    total_length = 0
-#    for service in get_services():
-#        file_name = dictionary.get_dict_service_file_name(service)
-#        if not os.path.isfile(file_name):
-#            continue
-#
-#        f = open(file_name, "r+")
-#        length = len(f.readlines())
-#        total_length += length
-#        lengths[service] = length
-#        f.close()
-#
-#    for service in lengths:
-#        weight = float(lengths[service]) / float(total_length)*100
-#        sf.write(service + "\t" + str(length) + "\t" + str(weight) + "\n")
-#
-#    sf.close()
+        sf = open(self.get_dict_directory() + "dicts_weight.dat", "w+")
+
+        lengths = {}
+        total_length = 0
+        for service in self.service_provider.get_services_names():
+            file_name = self.get_dict_service_file_name(service)
+            if not os.path.isfile(file_name):
+                continue
+
+            f = open(file_name, "r+")
+            length = len(f.readlines())
+            total_length += length
+            lengths[service] = length
+            f.close()
+
+        for service in lengths:
+            weight = float(lengths[service]) / float(total_length)*100
+            sf.write(service + "\t" + str(length) + "\t" + str(weight) + "\n")
+
+        sf.close()
 
 
 #def prepare_service_namhe_for_use(service):
@@ -168,9 +179,14 @@ class Dictionary:
 #    return service
 
 
+if __name__ == "__main__":
 
+    if len(sys.argv) == 1:
+        conf_file = "../resources/config.cfg"
+    else:
+        conf_file = sys.argv[1]
 
-
+    ConfigReader(conf_file)
 
 
 

@@ -9,16 +9,18 @@ import multiprocessing
 from multiprocessing import Pipe
 import cStringIO as cstr
 import scripts_helpers.corpora.helper as helper
-from scripts_helpers.corpora.dicts_builders import issues_corpora_builder as iss
-from scripts_helpers.corpora.dicts_builders import activities_corpora_builder as act
+from scripts_helpers.corpora.dicts_builders.issues_corpora_builder import Builder as IssueCorporaBuilder
+from scripts_helpers.corpora.dicts_builders.activities_corpora_builder import Builder as ActivityCorporaBuilder
 from scripts_helpers.corpora.redmine_services_provider import RedmineServicesProvider
 from scripts_helpers.corpora.config_loader import ConfigReader
+from scripts_helpers.corpora.helper import Dictionary
+
 
 class EntriesTestSet(multiprocessing.Process):
 
-    def __init__(self, cr, services_entries, permutations, pipe, ordinal, services_names):
+    def __init__(self, config_reader, services_entries, permutations, pipe, ordinal, services_names):
         """
-        @type cr: ConfigReader
+        @type config_reader: ConfigReader
         @type services_entries: dict
         @type permutations: list
         @type pipe: multiprocessing.connection
@@ -31,7 +33,7 @@ class EntriesTestSet(multiprocessing.Process):
         self.pipe = pipe
         self.ordinal = ordinal
         self.services_names = services_names
-        self.cr = cr
+        self.config_reader = config_reader
         super(EntriesTestSet, self).__init__()
 
     @staticmethod
@@ -45,7 +47,7 @@ class EntriesTestSet(multiprocessing.Process):
 
     def run(self):
 
-        f = open(self.cr.get_property("tmp_dir") + str(self._parent_pid) + "/" + str(self.ordinal) + ".tmp", "w+")
+        f = open(self.config_reader.get_property("tmp_dir") + str(self._parent_pid) + "/" + str(self.ordinal) + ".tmp", "w+")
 
         service_id_col = 0
         service_name_col = 1
@@ -71,7 +73,9 @@ class EntriesTestSet(multiprocessing.Process):
                         service_entry,
                         permutation[issue_weigth_col],
                         permutation[activity_weight_col],
-                        self.services_names.values())
+                        self.services_names.values(),
+                        self.config_reader
+                        )
 
                     expected = service_name
 
@@ -184,11 +188,16 @@ class TestSetList:
         for test in self.testSets:
             test.join()
 
+def individual_test(to_test, issue_weigth, activity_weight, services_dicts, config_reader):
 
-def individual_test(to_test, issue_weigth, activity_weight, services_dicts):
+    service_provider = RedmineServicesProvider()
+    activity_dictionary = Dictionary(config_reader, "from_comments", service_provider)
+    issue_dictionary = Dictionary(config_reader, "from_issues", service_provider)
+    iss = IssueCorporaBuilder(config_reader, service_provider, issue_dictionary)
+    act = ActivityCorporaBuilder(config_reader, service_provider, activity_dictionary)
 
-    services_issues_res= iss.test(to_test, services_dicts)
-    services_activity_res = act.test(to_test, services_dicts)
+    services_issues_res = iss.test(to_test)
+    services_activity_res = act.test(to_test)
     final = {}
     for service in services_issues_res:
         final[service] = issue_weigth*services_issues_res[service] + activity_weight*services_activity_res[service]
@@ -200,7 +209,6 @@ def order_results(final):
 
     sorted_x = sorted(final.iteritems(), key=operator.itemgetter(1), reverse=True)
     return sorted_x
-
 
 def compute(properties):
     """
@@ -263,7 +271,8 @@ def compute(properties):
 
     printer_conn, subprocess_conn = Pipe()
     printer_connections.append(printer_conn)
-    test_set_list.add_testset_and_start(assign_permutations(properties, assign, service_buffer, ordianl, subprocess_conn))
+    test_set_list.add_testset_and_start(
+        assign_permutations(properties, assign, service_buffer, ordianl, subprocess_conn))
 
     main_process_conn, printer_conn = Pipe()
     PrinterProcess(total_to_analyze, printer_connections, printer_conn).start()
@@ -272,21 +281,21 @@ def compute(properties):
     summarize_results(properties, ordinals)
 
 
-def summarize_results(cr, ordinals):
+def summarize_results(config_reader, ordinals):
     """
-    @type cr: ConfigReader
+    @type config_reader: ConfigReader
     """
 
     service_col = 0
     issue_weigth_col = 1
     activity_weight_col = 2
     result_col = 3
-    rf = open(get_results_file_name(cr), "w+")
+    rf = open(get_results_file_name(config_reader), "w+")
     results = {}
 
     for ordinal in ordinals:
 
-        f = open(cr.get_property("tmp_dir") + str(os.getpid()) + "/" + str(ordinal) + ".tmp", "r+")
+        f = open(config_reader.get_property("tmp_dir") + str(os.getpid()) + "/" + str(ordinal) + ".tmp", "r+")
 
         for line in f.readlines():
             line = line[:-1]
@@ -331,23 +340,24 @@ def summarize_results(cr, ordinals):
     rf.close()
 
 
-def assign_permutations(cr, permutations, service_buffer, ordinal, child_conn):
+def assign_permutations(config_reader, permutations, service_buffer, ordinal, child_conn):
     """
     @type service_buffer: ServicesBuffer
-    @type cr: ConfigReader
+    @type config_reader: ConfigReader
     """
     return EntriesTestSet(
-        cr,
+        config_reader,
         service_buffer.get_entries_tupples(),
         permutations,
         child_conn,
         ordinal,
-        service_buffer.services_provider.get_services_as_dict())
+        service_buffer.services_provider.get_services_as_dict()
+        )
 
 
-def get_results_file_name(cr):
+def get_results_file_name(config_reader):
     now = datetime.datetime.now()
-    return cr.get_property("results_dir") + "/results_" + str(os.getpid()) + "_-" + str(now.day) + "-" + str(now.month) + "-" \
+    return config_reader.get_property("results_dir") + "/results_" + str(os.getpid()) + "_-" + str(now.day) + "-" + str(now.month) + "-" \
            + str(now.year) + "_" + str(now.hour) + "_" + str(now.minute) + "-" + str(now.second) + ".dat"
 
 def get_random_id(max, service_id):
