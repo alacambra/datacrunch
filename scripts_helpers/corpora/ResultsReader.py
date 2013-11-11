@@ -31,9 +31,7 @@ class ResultsReader:
 
                 results[result.proportion] = result.result
 
-            x = [x for x in results]
-            y = [y for y in results.values()]
-            plt.scatter(x, y)
+            plt.scatter(results.keys(), results.values())
 
             plt.grid(True)
             plt.title(service)
@@ -82,6 +80,4 @@ class Result():
                "\ntotal:" + self.total + \
                "\nresult:" + str(self.result)
 
-ResultsReader("results/results_30293_-8-11-2013_2_13-28.dat")
-#plt.plot([1,3,2,5,4], [4,67,3,5,1])
-#plt.show()
+ResultsReader("results/results_13376_-8-11-2013_18_33-17.dat")

@@ -15,96 +15,106 @@ field_separator = "[[[[[]]]]]"
 results_field_separator = "\t\t"
 
 
-class Service:
-
-    def __init__(self, id, name):
-        self.id = id
-        self.name = prepare_service_name_for_use(name)
-
-    def __str__(self):
-        return str(id) + ":" + self.name
-
-
-def get_services():
-
-    query_ids = "SELECT id, name FROM enumerations"
-    cursor = db.cursor()
-    cursor.execute(query_ids)
-    res = cursor.fetchall()
-
-    services = {}
-
-    for r in res:
-        s = Service(r[0], r[1])
-
-        if s.name not in services:
-            services[s.name] = []
-
-        services[s.name].append(s)
-
-    return services
+#class Service:
+#
+#    def __init__(self, id, name):
+#        self.id = id
+#        self.name = prepare_service_name_for_use(name)
+#
+#    def __str__(self):
+#        return str(id) + ":" + self.name
 
 
-def get_services_ids():
-
-    query_ids = "SELECT e.name, activity_id " \
-                "FROM redmine.time_entries as te, " \
-                "enumerations as e " \
-                "where te.activity_id=e.id group by(activity_id);"
-
-    cursor = db.cursor()
-    cursor.execute(query_ids)
-    res = cursor.fetchall()
-
-    services = []
-
-    for r in res:
-        services.append(r[1])
-
-    return services
-
-
-def clean_word(w):
-
-    w = w.strip()
-
-    w = w.replace(".", "iamadot")
-    w = re.sub("^\W*(\w+[^\w]*\w+)+\W*$", r"\1", w)
-    w = w.replace("iamadot", ".")
-
-    if len(w) > 0 and w[-1] == ".":
-        w = w[:-1]
-
-    return w
+#def get_services():
+#
+#    query_ids = "SELECT id, name FROM enumerations"
+#    cursor = db.cursor()
+#    cursor.execute(query_ids)
+#    res = cursor.fetchall()
+#
+#    services = {}
+#
+#    for r in res:
+#        s = Service(r[0], r[1])
+#
+#        if s.name not in services:
+#            services[s.name] = []
+#
+#        services[s.name].append(s)
+#
+#    return services
 
 
-def word_is_valid(w):
+#def get_services_ids():
+#
+#    query_ids = "SELECT e.name, activity_id " \
+#                "FROM redmine.time_entries as te, " \
+#                "enumerations as e " \
+#                "where te.activity_id=e.id group by(activity_id);"
+#
+#    cursor = db.cursor()
+#    cursor.execute(query_ids)
+#    res = cursor.fetchall()
+#
+#    services = []
+#
+#    for r in res:
+#        services.append(r[1])
+#
+#    return services
 
-    if len(re.findall("[0-9a-z]+", w)) == 0:
-        return False
+class WordHelper:
 
-    return True
+    def __init__(self, cr):
+        """
+        @type cr: ConfigReader
+        """
+        self.cr = cr
+        self.word_dot_replacement = "iamadot"
 
+    def clean_word(self, w):
+        w = w.strip()
+        w = w.replace(".", self.word_dot_replacement)
+        w = re.sub("^\W*(\w+[^\w]*\w+)+\W*$", r"\1", w)
+        w = w.replace(self.word_dot_replacement, ".")
 
-def get_stop_words():
+        if len(w) > 0 and w[-1] == ".":
+            w = w[:-1]
 
-    stop_words = codecs.open("../resources/stop-words-de.txt", "r", "utf8")
-    stop_words = codecs.encode(stop_words.read(), "unicode_escape")
-    stop_words = stop_words.split("\\n")
+        return w
 
-    return stop_words
+    @staticmethod
+    def word_is_valid(w):
+
+        if len(re.findall("[0-9a-z]+", w)) == 0:
+            return False
+
+        return True
+
+    @staticmethod
+    def get_stop_words():
+
+        stop_words = codecs.open("../resources/stop-words-de.txt", "r", "utf8")
+        stop_words = codecs.encode(stop_words.read(), "unicode_escape")
+        stop_words = stop_words.split("\\n")
+
+        return stop_words
 
 
 class Dictionary:
 
-    def __init__(self, dict_folder_name):
-        self.dict_folder_name = dict_folder_name
+    def __init__(self, cr, dictionary_name):
+        """
+        @type cr: ConfigReader
+        """
+        self.dict_folder_name = cr.get_property("dicts_dir")
+        self.dictionary_name = dictionary_name
 
     def get_dict_service_file_name(self, service):
         return self.get_dict_directory() + service + ".dict"
 
     def get_dict_directory(self):
-        return "../dicts/" + self.dict_folder_name + "/"
+        return self.dict_folder_name + self.dictionary_name + "/"
 
     def get_dict_length(self, service):
         d = open(self.get_dict_service_file_name(service))
@@ -128,34 +138,34 @@ class Dictionary:
         return d
 
 
-def generate_dictionary_size_file(dictionary):
+#def generate_dictionary_size_file(dictionary):
+#
+#    sf = open(dictionary.get_dict_directory() + "dicts_weight.dat", "w+")
+#
+#    lengths = {}
+#    total_length = 0
+#    for service in get_services():
+#        file_name = dictionary.get_dict_service_file_name(service)
+#        if not os.path.isfile(file_name):
+#            continue
+#
+#        f = open(file_name, "r+")
+#        length = len(f.readlines())
+#        total_length += length
+#        lengths[service] = length
+#        f.close()
+#
+#    for service in lengths:
+#        weight = float(lengths[service]) / float(total_length)*100
+#        sf.write(service + "\t" + str(length) + "\t" + str(weight) + "\n")
+#
+#    sf.close()
 
-    sf = open(dictionary.get_dict_directory() + "dicts_weight.dat", "w+")
 
-    lengths = {}
-    total_length = 0
-    for service in get_services():
-        file_name = dictionary.get_dict_service_file_name(service)
-        if not os.path.isfile(file_name):
-            continue
-
-        f = open(file_name, "r+")
-        length = len(f.readlines())
-        total_length += length
-        lengths[service] = length
-        f.close()
-
-    for service in lengths:
-        weight = float(lengths[service]) / float(total_length)*100
-        sf.write(service + "\t" + str(length) + "\t" + str(weight) + "\n")
-
-    sf.close()
-
-
-def prepare_service_name_for_use(service):
-    service = codecs.decode(service.replace("/", "_"), "unicode_escape")
-    service = codecs.encode(service, "utf8").lower()
-    return service
+#def prepare_service_namhe_for_use(service):
+#    service = codecs.decode(service.replace("/", "_"), "unicode_escape")
+#    service = codecs.encode(service, "utf8").lower()
+#    return service
 
 
 

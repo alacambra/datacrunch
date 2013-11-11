@@ -20,7 +20,7 @@ def get_words():
 
     services = service_provider.get_services_as_tupples()
 
-    services_dict = {}
+    created_dicts_list = []
     times = get_total_services_time()
 
     for service in services:
@@ -28,7 +28,7 @@ def get_words():
         service_name = service[RedmineServicesProvider.name_col]
         service_id = service[RedmineServicesProvider.id_col]
 
-        if service_name in services_dict:
+        if service_name in created_dicts_list:
             continue
 
         q = query
@@ -42,6 +42,7 @@ def get_words():
         else:
             q += str(service_id)
 
+        created_dicts_list.append(service_name)
         cursor = helper.db.cursor()
         cursor.execute(q)
         entries = cursor.fetchall()
@@ -78,12 +79,10 @@ def get_words():
 
 
 def generate_weight_dictionary(service, words):
-
-    #df = codecs.open(dictionary.get_dict_service_file_name(service), "w+", "utf8");
+    print(service)
     df = open(dictionary.get_dict_service_file_name(service), "w+")
 
     for w in words:
-        #df.write(codecs.decode(w, "unicode_escape") + helper.field_separator + str(words[w]) + "\n")
         df.write(w + helper.field_separator + str(words[w]) + "\n")
 
     helper.generate_dictionary_size_file(dictionary)
@@ -148,45 +147,6 @@ def load_dict(service_name):
         dict[w[0]] = w[1][:-1]
 
     return dict
-
-generate_dicts()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

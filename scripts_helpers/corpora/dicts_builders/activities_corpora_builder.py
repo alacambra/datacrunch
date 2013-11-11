@@ -141,13 +141,6 @@ def load_dict(service_name):
     return dict
 
 
-generate_dicts()
-
-
-
-
-
-
 
 
 

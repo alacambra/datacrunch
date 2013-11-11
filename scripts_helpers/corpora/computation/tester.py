@@ -8,24 +8,34 @@ import os
 import multiprocessing
 from multiprocessing import Pipe
 import cStringIO as cstr
-
-import helper
+import scripts_helpers.corpora.helper as helper
 from scripts_helpers.corpora.dicts_builders import issues_corpora_builder as iss
+from scripts_helpers.corpora.dicts_builders import activities_corpora_builder as act
+from scripts_helpers.corpora.redmine_services_provider import RedmineServicesProvider
+from scripts_helpers.corpora.config_loader import ConfigReader
 
+class EntriesTestSet(multiprocessing.Process):
 
-class TestSet(multiprocessing.Process):
+    def __init__(self, cr, services_entries, permutations, pipe, ordinal, services_names):
+        """
+        @type cr: ConfigReader
+        @type services_entries: dict
+        @type permutations: list
+        @type pipe: multiprocessing.connection
+        @type: int
+        @type services_names: dict
+        """
 
-    def __init__(self, entries, permutations, pipe, ordinal, services_dicts):
-
-        self.entries = entries
+        self.services_entries = services_entries
         self.permutations = permutations
         self.pipe = pipe
         self.ordinal = ordinal
-        self.services_dicts = services_dicts
+        self.services_names = services_names
+        self.cr = cr
+        super(EntriesTestSet, self).__init__()
 
-        super(TestSet, self).__init__()
-
-    def is_successfull(self, result, expected):
+    @staticmethod
+    def is_successfull(result, expected):
 
         for i in range(0, 5):
             if result[i][0] == expected:
@@ -35,7 +45,7 @@ class TestSet(multiprocessing.Process):
 
     def run(self):
 
-        f = open("results/tmp/" + str(self._parent_pid) + "/" + str(self.ordinal) + ".tmp", "w+")
+        f = open(self.cr.get_property("tmp_dir") + str(self._parent_pid) + "/" + str(self.ordinal) + ".tmp", "w+")
 
         service_id_col = 0
         service_name_col = 1
@@ -44,29 +54,28 @@ class TestSet(multiprocessing.Process):
         issue_weigth_col = 1
         activity_weight_col = 2
 
-        results = {}
         s = cstr.StringIO()
 
         total = 0
 
         for permutation in self.permutations:
 
-            correct = 0
-            false = 0
             total = 0
 
-            for services_entry in self.entries:
-                for entry in services_entry:
+            for services_entry in self.services_entries.items():
+                service_id = services_entry[0]
+                service_name = self.services_names[service_id]
+                for service_entry in services_entry[1]:
 
                     res = individual_test(
-                        entry[comment_col],
+                        service_entry,
                         permutation[issue_weigth_col],
                         permutation[activity_weight_col],
-                        self.services_dicts)
+                        self.services_names.values())
 
-                    expected = entry[service_name_col]
+                    expected = service_name
 
-                    s.write(helper.prepare_service_name_for_use(entry[service_name_col]))
+                    s.write(service_name)
                     s.write(helper.field_separator)
                     s.write(str(permutation[issue_weigth_col]))
                     s.write(helper.field_separator)
@@ -118,50 +127,48 @@ class PrinterProcess(multiprocessing.Process):
 
 class ServicesBuffer:
 
-    def __init__(self, num_samples_per_activity):
-
-        self.services = {}
-        for service_id in helper.get_services_ids():
-            self.services[service_id] = False
-
+    def __init__(self, num_samples_per_activity, services_provider):
+        """
+         @type services_provider: RedmineServicesProvider
+        """
+        self.services_provider = services_provider
+        self.services_entries_tupples = {}
         self.num_samples_per_activity = num_samples_per_activity
-        self.services_names = []
         self.load_all_entries()
 
     def load_all_entries(self):
-        ids = helper.get_services_ids()
+        for service_id in self.services_provider.get_services_ids():
+            #self.services_entries_tupples[service_id] = get_entries(service_id, self.num_samples_per_activity)
+            self.get_entries(service_id)
 
-        for service_id in ids:
-
-            self.services[service_id] = get_entries(service_id, self.num_samples_per_activity)
-            service_name = helper.prepare_service_name_for_use(self.services[service_id][0][1])
-
-            if service_name not in self.services_names:
-                self.services_names.append(service_name)
-
-    #def get_entries_for_service(self, service_id):
-    #
-    #    if service_id in self.services:
-    #        return self.services[service_id]
-    #
-    #    else:
-    #        entries = get_entries(service_id, self.num_samples_per_activity)
-    #        self.services[service_id] = entries
-    #        return self.entries
-
-    def get_entries(self):
-        return self.services
+    def get_entries_tupples(self):
+        return self.services_entries_tupples
 
     def get_total_entries(self):
 
         total = 0
-        for i in self.services.values():
+        for i in self.services_entries_tupples.values():
             total += len(i)
 
         return total
 
-    def get_services(self):
-        return self.services_names
+    def get_entries(self, activity_id):
+        random_ids = get_random_id(self.num_samples_per_activity, activity_id)
+
+        if not random_ids:
+            return False
+
+        query = "select te.comments AS comments " \
+                "from(redmine.time_entries te join redmine.enumerations e ON ((te.activity_id = e.id)))"
+
+        query += " WHERE (" + random_ids + ") and activity_id=" + str(activity_id) + \
+                 " order by te.id limit " + str(self.num_samples_per_activity)
+
+        cursor = helper.db.cursor()
+        cursor.execute(query)
+        entries = cursor.fetchall()
+
+        self.services_entries_tupples[activity_id] = [service_entry[0] for service_entry in entries]
 
 
 class TestSetList:
@@ -195,21 +202,27 @@ def order_results(final):
     return sorted_x
 
 
-def compute():
+def compute(properties):
+    """
+    @type properties: ConfigReader
+    """
+    print("Starting:" + str(os.getpid()))
 
-    num_process = 8
-    num_samples_per_activity = 10
+    num_process = properties.get_int_property("num_process")
+    num_samples_per_activity = properties.get_int_property("num_samples_per_activity")
 
-    start_issue_weight = 1
-    end_issue_weight = 10
-    start_activity_weight = 1
-    end_activity_weight = 10
-    step = 5
+    start_issue_weight = properties.get_int_property("start_issue_weight")
+    end_issue_weight = properties.get_int_property("end_issue_weight")
+    start_activity_weight = properties.get_int_property("start_activity_weight")
+    end_activity_weight = properties.get_int_property("end_activity_weight")
+    step = properties.get_int_property("step")
 
-    service_buffer = ServicesBuffer(num_samples_per_activity)
+    service_provider = RedmineServicesProvider()
+
+    service_buffer = ServicesBuffer(num_samples_per_activity, service_provider)
 
     permutations = {}
-    os.mkdir("results/tmp/" + str(os.getpid()))
+    os.mkdir(properties.get_property("tmp_dir") + str(os.getpid()))
 
     for issue_weigth in range(start_issue_weight, end_issue_weight+1, step):
         for activity_weight in range(start_activity_weight, end_activity_weight+1, step):
@@ -222,9 +235,7 @@ def compute():
             permutations[proportion] = (proportion, activity_weight, issue_weigth)
 
     total_to_analyze = service_buffer.get_total_entries() * len(permutations)
-
     assign = []
-
     i = 0
     j = 1
     ordianl = 0
@@ -232,44 +243,50 @@ def compute():
     test_set_list = TestSetList()
     printer_connections = []
 
-    for perm in permutations.values():
+    for permutation in permutations.values():
 
         if i >= round(len(permutations) * j / num_process):
 
             printer_conn, subprocess_conn = Pipe()
             printer_connections.append(printer_conn)
-            test_set_list.add_testset_and_start(assign_permutations(assign, service_buffer, ordianl, subprocess_conn))
+
+            test_set_list.add_testset_and_start(
+                assign_permutations(properties, assign, service_buffer, ordianl, subprocess_conn))
+
             ordinals.append(ordianl)
             ordianl += 1
             j += 1
             assign = []
 
-        assign.append(perm)
+        assign.append(permutation)
         i += 1
 
     printer_conn, subprocess_conn = Pipe()
     printer_connections.append(printer_conn)
-    test_set_list.add_testset_and_start(assign_permutations(assign, service_buffer, ordianl, subprocess_conn))
+    test_set_list.add_testset_and_start(assign_permutations(properties, assign, service_buffer, ordianl, subprocess_conn))
 
     main_process_conn, printer_conn = Pipe()
     PrinterProcess(total_to_analyze, printer_connections, printer_conn).start()
     test_set_list.wait_for_test_ready()
     main_process_conn.send("ready")
-    summarize_results(ordinals)
+    summarize_results(properties, ordinals)
 
 
-def summarize_results(ordinals):
+def summarize_results(cr, ordinals):
+    """
+    @type cr: ConfigReader
+    """
 
     service_col = 0
     issue_weigth_col = 1
     activity_weight_col = 2
     result_col = 3
-    rf = open(get_results_file_name(), "w+")
+    rf = open(get_results_file_name(cr), "w+")
     results = {}
 
     for ordinal in ordinals:
 
-        f = open("results/tmp/" + str(os.getpid()) + "/" + str(ordinal) + ".tmp", "r+")
+        f = open(cr.get_property("tmp_dir") + str(os.getpid()) + "/" + str(ordinal) + ".tmp", "r+")
 
         for line in f.readlines():
             line = line[:-1]
@@ -314,39 +331,24 @@ def summarize_results(ordinals):
     rf.close()
 
 
-def assign_permutations(permutations, service_buffer, ordinal, child_conn):
-    return TestSet(
-        service_buffer.get_entries().values(),
+def assign_permutations(cr, permutations, service_buffer, ordinal, child_conn):
+    """
+    @type service_buffer: ServicesBuffer
+    @type cr: ConfigReader
+    """
+    return EntriesTestSet(
+        cr,
+        service_buffer.get_entries_tupples(),
         permutations,
         child_conn,
         ordinal,
-        service_buffer.get_services_as_tupples())
+        service_buffer.services_provider.get_services_as_dict())
 
 
-def get_results_file_name():
+def get_results_file_name(cr):
     now = datetime.datetime.now()
-    return "results/results_" + str(os.getpid()) + "_-" + str(now.day) + "-" + str(now.month) + "-" \
+    return cr.get_property("results_dir") + "/results_" + str(os.getpid()) + "_-" + str(now.day) + "-" + str(now.month) + "-" \
            + str(now.year) + "_" + str(now.hour) + "_" + str(now.minute) + "-" + str(now.second) + ".dat"
-
-
-def get_entries(activity_id, num_samples_per_activity):
-    random_ids = get_random_id(num_samples_per_activity, activity_id)
-
-    if not random_ids:
-        return False
-
-    query = "select e.id AS activity_id, e.name AS activity_name, te.comments AS comments " \
-            "from(redmine.time_entries te join redmine.enumerations e ON ((te.activity_id = e.id)))"
-
-    query += " WHERE (" + random_ids + ") and activity_id=" + str(activity_id) +\
-             " order by te.id limit " + str(num_samples_per_activity)
-
-    cursor = helper.db.cursor()
-    cursor.execute(query)
-    entries = cursor.fetchall()
-
-    return entries
-
 
 def get_random_id(max, service_id):
 
@@ -402,45 +404,15 @@ def print_done(done, total):
     sys.stdout.write("%3f%%\r" % new)
     sys.stdout.flush()
 
-compute()
 
+if __name__ == "__main__":
 
-#service_buffer = ServicesBuffer(40)
-#for a in individual_test("Neues HTML-Template erstellen", 1, 1000, service_buffer.get_services()):
-#    print(a)
+    if len(sys.argv) == 1:
+        conf_file = "../resources/config.cfg"
+    else:
+        conf_file = sys.argv[1]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    compute(ConfigReader(conf_file))
 
 
 
