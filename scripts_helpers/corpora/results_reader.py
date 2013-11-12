@@ -1,9 +1,10 @@
 import re
-import matplotlib.pyplot as plt
 import os
 import codecs
 import time
-
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 class ResultsReader:
 
@@ -15,9 +16,6 @@ class ResultsReader:
         self.results = {}
         self.load_results()
         self.plot()
-
-    def get_results_by_service(self):
-        a = 0
 
     def plot(self):
 
@@ -79,5 +77,3 @@ class Result():
                "\nok:" + self.ok + \
                "\ntotal:" + self.total + \
                "\nresult:" + str(self.result)
-
-ResultsReader("results/results_13376_-8-11-2013_18_33-17.dat")

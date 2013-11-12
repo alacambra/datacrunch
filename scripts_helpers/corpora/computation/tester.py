@@ -14,11 +14,12 @@ from scripts_helpers.corpora.dicts_builders.activities_corpora_builder import Bu
 from scripts_helpers.corpora.redmine_services_provider import RedmineServicesProvider
 from scripts_helpers.corpora.config_loader import ConfigReader
 from scripts_helpers.corpora.helper import Dictionary
+from scripts_helpers.corpora.results_reader import ResultsReader
 
 
 class EntriesTestSet(multiprocessing.Process):
 
-    def __init__(self, config_reader, services_entries, permutations, pipe, ordinal, services_names):
+    def __init__(self, config_reader, service_buffer, permutations, pipe, ordinal):
         """
         @type config_reader: ConfigReader
         @type services_entries: dict
@@ -28,12 +29,13 @@ class EntriesTestSet(multiprocessing.Process):
         @type services_names: dict
         """
 
-        self.services_entries = services_entries
+        self.services_entries = service_buffer.get_entries_tupples()
         self.permutations = permutations
         self.pipe = pipe
         self.ordinal = ordinal
-        self.services_names = services_names
+        self.services_names = service_buffer.services_provider.get_services_as_dict()
         self.config_reader = config_reader
+        self.service_provider = service_buffer.services_provider
         super(EntriesTestSet, self).__init__()
 
     @staticmethod
@@ -74,7 +76,8 @@ class EntriesTestSet(multiprocessing.Process):
                         permutation[issue_weigth_col],
                         permutation[activity_weight_col],
                         self.services_names.values(),
-                        self.config_reader
+                        self.config_reader,
+                        self.service_provider
                         )
 
                     expected = service_name
@@ -188,9 +191,8 @@ class TestSetList:
         for test in self.testSets:
             test.join()
 
-def individual_test(to_test, issue_weigth, activity_weight, services_dicts, config_reader):
+def individual_test(to_test, issue_weigth, activity_weight, services_dicts, config_reader, service_provider):
 
-    service_provider = RedmineServicesProvider()
     activity_dictionary = Dictionary(config_reader, "from_comments", service_provider)
     issue_dictionary = Dictionary(config_reader, "from_issues", service_provider)
     iss = IssueCorporaBuilder(config_reader, service_provider, issue_dictionary)
@@ -210,27 +212,27 @@ def order_results(final):
     sorted_x = sorted(final.iteritems(), key=operator.itemgetter(1), reverse=True)
     return sorted_x
 
-def compute(properties):
+def compute(config_reader):
     """
-    @type properties: ConfigReader
+    @type config_reader: ConfigReader
     """
     print("Starting:" + str(os.getpid()))
 
-    num_process = properties.get_int_property("num_process")
-    num_samples_per_activity = properties.get_int_property("num_samples_per_activity")
+    num_process = config_reader.get_int_property("num_process")
+    num_samples_per_activity = config_reader.get_int_property("num_samples_per_activity")
 
-    start_issue_weight = properties.get_int_property("start_issue_weight")
-    end_issue_weight = properties.get_int_property("end_issue_weight")
-    start_activity_weight = properties.get_int_property("start_activity_weight")
-    end_activity_weight = properties.get_int_property("end_activity_weight")
-    step = properties.get_int_property("step")
+    start_issue_weight = config_reader.get_int_property("start_issue_weight")
+    end_issue_weight = config_reader.get_int_property("end_issue_weight")
+    start_activity_weight = config_reader.get_int_property("start_activity_weight")
+    end_activity_weight = config_reader.get_int_property("end_activity_weight")
+    step = config_reader.get_int_property("step")
 
     service_provider = RedmineServicesProvider()
 
     service_buffer = ServicesBuffer(num_samples_per_activity, service_provider)
 
     permutations = {}
-    os.mkdir(properties.get_property("tmp_dir") + str(os.getpid()))
+    os.mkdir(config_reader.get_property("tmp_dir") + str(os.getpid()))
 
     for issue_weigth in range(start_issue_weight, end_issue_weight+1, step):
         for activity_weight in range(start_activity_weight, end_activity_weight+1, step):
@@ -243,7 +245,7 @@ def compute(properties):
             permutations[proportion] = (proportion, activity_weight, issue_weigth)
 
     total_to_analyze = service_buffer.get_total_entries() * len(permutations)
-    assign = []
+    assigned_premutations = []
     i = 0
     j = 1
     ordianl = 0
@@ -259,26 +261,28 @@ def compute(properties):
             printer_connections.append(printer_conn)
 
             test_set_list.add_testset_and_start(
-                assign_permutations(properties, assign, service_buffer, ordianl, subprocess_conn))
+                assign_permutations(
+                    config_reader, assigned_premutations, service_buffer, ordianl, subprocess_conn, service_provider))
 
             ordinals.append(ordianl)
             ordianl += 1
             j += 1
-            assign = []
+            assigned_premutations = []
 
-        assign.append(permutation)
+        assigned_premutations.append(permutation)
         i += 1
 
     printer_conn, subprocess_conn = Pipe()
     printer_connections.append(printer_conn)
     test_set_list.add_testset_and_start(
-        assign_permutations(properties, assign, service_buffer, ordianl, subprocess_conn))
+        assign_permutations(
+            config_reader, assigned_premutations, service_buffer, ordianl, subprocess_conn, service_provider))
 
     main_process_conn, printer_conn = Pipe()
     PrinterProcess(total_to_analyze, printer_connections, printer_conn).start()
     test_set_list.wait_for_test_ready()
     main_process_conn.send("ready")
-    summarize_results(properties, ordinals)
+    summarize_results(config_reader, ordinals)
 
 
 def summarize_results(config_reader, ordinals):
@@ -290,7 +294,8 @@ def summarize_results(config_reader, ordinals):
     issue_weigth_col = 1
     activity_weight_col = 2
     result_col = 3
-    rf = open(get_results_file_name(config_reader), "w+")
+    results_file_name = get_results_file_name(config_reader)
+    rf = open(results_file_name, "w+")
     results = {}
 
     for ordinal in ordinals:
@@ -339,20 +344,23 @@ def summarize_results(config_reader, ordinals):
 
     rf.close()
 
+    ResultsReader(results_file_name)
 
-def assign_permutations(config_reader, permutations, service_buffer, ordinal, child_conn):
+
+def assign_permutations(config_reader, assigned_premutations, service_buffer, ordinal, child_conn, service_provider):
     """
     @type service_buffer: ServicesBuffer
     @type config_reader: ConfigReader
+    @type service_provider: RedmineServicesProvider
     """
+
     return EntriesTestSet(
         config_reader,
-        service_buffer.get_entries_tupples(),
-        permutations,
+        service_buffer,
+        assigned_premutations,
         child_conn,
-        ordinal,
-        service_buffer.services_provider.get_services_as_dict()
-        )
+        ordinal
+    )
 
 
 def get_results_file_name(config_reader):
@@ -416,9 +424,9 @@ def print_done(done, total):
 
 
 if __name__ == "__main__":
-
+    os.chdir(sys.path[0])
     if len(sys.argv) == 1:
-        conf_file = "../resources/config.cfg"
+        conf_file = "../../resources/config.cfg"
     else:
         conf_file = sys.argv[1]
 

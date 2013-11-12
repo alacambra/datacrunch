@@ -5,9 +5,6 @@ import codecs
 from scripts_helpers.corpora.config_loader import ConfigReader
 from scripts_helpers.corpora.redmine_services_provider import RedmineServicesProvider
 
-import sys
-
-
 db = MySQLdb.connect(
         host="marceli", # your host, usually localhost
         user="root", # your username
@@ -17,55 +14,6 @@ db = MySQLdb.connect(
 
 field_separator = "[[[[[]]]]]"
 results_field_separator = "\t\t"
-
-
-#class Service:
-#
-#    def __init__(self, id, name):
-#        self.id = id
-#        self.name = prepare_service_name_for_use(name)
-#
-#    def __str__(self):
-#        return str(id) + ":" + self.name
-
-
-#def get_services():
-#
-#    query_ids = "SELECT id, name FROM enumerations"
-#    cursor = db.cursor()
-#    cursor.execute(query_ids)
-#    res = cursor.fetchall()
-#
-#    services = {}
-#
-#    for r in res:
-#        s = Service(r[0], r[1])
-#
-#        if s.name not in services:
-#            services[s.name] = []
-#
-#        services[s.name].append(s)
-#
-#    return services
-
-
-#def get_services_ids():
-#
-#    query_ids = "SELECT e.name, activity_id " \
-#                "FROM redmine.time_entries as te, " \
-#                "enumerations as e " \
-#                "where te.activity_id=e.id group by(activity_id);"
-#
-#    cursor = db.cursor()
-#    cursor.execute(query_ids)
-#    res = cursor.fetchall()
-#
-#    services = []
-#
-#    for r in res:
-#        services.append(r[1])
-#
-#    return services
 
 class WordHelper:
 
@@ -171,23 +119,6 @@ class Dictionary:
             sf.write(service + "\t" + str(length) + "\t" + str(weight) + "\n")
 
         sf.close()
-
-
-#def prepare_service_namhe_for_use(service):
-#    service = codecs.decode(service.replace("/", "_"), "unicode_escape")
-#    service = codecs.encode(service, "utf8").lower()
-#    return service
-
-
-if __name__ == "__main__":
-
-    if len(sys.argv) == 1:
-        conf_file = "../resources/config.cfg"
-    else:
-        conf_file = sys.argv[1]
-
-    ConfigReader(conf_file)
-
 
 
 
