@@ -23,9 +23,8 @@ class Builder:
     def generate_dicts(self):
         self.get_words()
 
-    def get_words(self):
+    def get_words(self, query="SELECT invested_time, subject FROM activities_by_issue where activity_id = "):
 
-        query = "SELECT invested_time, subject FROM activities_by_issue where activity_id = "
         stop_words = WordHelper.get_stop_words()
 
         created_dicts_list = []

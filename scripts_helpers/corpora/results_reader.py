@@ -33,7 +33,7 @@ class ResultsReader:
 
             plt.grid(True)
             plt.title(service)
-            #plt.axis([0, 10, 0, 100])
+            plt.axis([0, 10, 0, 100])
             plt.xlabel("activity_weigth / issue_weight")
             plt.ylabel("perfect matches(% over " + str(self.results[service][0].total) + ")")
 

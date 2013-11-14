@@ -38,10 +38,9 @@ class EntriesTestSet(multiprocessing.Process):
         self.service_provider = service_buffer.services_provider
         super(EntriesTestSet, self).__init__()
 
-    @staticmethod
-    def is_successfull(result, expected):
+    def is_successfull(self, result, expected):
 
-        for i in range(0, 5):
+        for i in range(0, self.config_reader.get_int_property("consider_valid_range")):
             if result[i][0] == expected:
                 return True
 
@@ -50,10 +49,6 @@ class EntriesTestSet(multiprocessing.Process):
     def run(self):
 
         f = open(self.config_reader.get_property("tmp_dir") + str(self._parent_pid) + "/" + str(self.ordinal) + ".tmp", "w+")
-
-        service_id_col = 0
-        service_name_col = 1
-        comment_col = 2
 
         issue_weigth_col = 1
         activity_weight_col = 2
@@ -75,10 +70,9 @@ class EntriesTestSet(multiprocessing.Process):
                         service_entry,
                         permutation[issue_weigth_col],
                         permutation[activity_weight_col],
-                        self.services_names.values(),
                         self.config_reader,
                         self.service_provider
-                        )
+                    )
 
                     expected = service_name
 
@@ -99,6 +93,7 @@ class EntriesTestSet(multiprocessing.Process):
                     if total%10 == 0:
                         total = 0
                         self.pipe.send(10)
+
 
         f.write(s.getvalue())
         self.pipe.send(total)
@@ -145,7 +140,6 @@ class ServicesBuffer:
 
     def load_all_entries(self):
         for service_id in self.services_provider.get_services_ids():
-            #self.services_entries_tupples[service_id] = get_entries(service_id, self.num_samples_per_activity)
             self.get_entries(service_id)
 
     def get_entries_tupples(self):
@@ -191,7 +185,8 @@ class TestSetList:
         for test in self.testSets:
             test.join()
 
-def individual_test(to_test, issue_weigth, activity_weight, services_dicts, config_reader, service_provider):
+
+def individual_test(to_test, issue_weigth, activity_weight, config_reader, service_provider):
 
     activity_dictionary = Dictionary(config_reader, "from_comments", service_provider)
     issue_dictionary = Dictionary(config_reader, "from_issues", service_provider)
@@ -211,6 +206,7 @@ def order_results(final):
 
     sorted_x = sorted(final.iteritems(), key=operator.itemgetter(1), reverse=True)
     return sorted_x
+
 
 def compute(config_reader):
     """
@@ -242,13 +238,13 @@ def compute(config_reader):
             if proportion in permutations:
                 continue
 
-            permutations[proportion] = (proportion, activity_weight, issue_weigth)
+            permutations[proportion] = (proportion, issue_weigth, activity_weight)
 
     total_to_analyze = service_buffer.get_total_entries() * len(permutations)
     assigned_premutations = []
     i = 0
     j = 1
-    ordianl = 0
+    ordinal = 0
     ordinals = []
     test_set_list = TestSetList()
     printer_connections = []
@@ -262,10 +258,10 @@ def compute(config_reader):
 
             test_set_list.add_testset_and_start(
                 assign_permutations(
-                    config_reader, assigned_premutations, service_buffer, ordianl, subprocess_conn, service_provider))
+                    config_reader, assigned_premutations, service_buffer, ordinal, subprocess_conn))
 
-            ordinals.append(ordianl)
-            ordianl += 1
+            ordinals.append(ordinal)
+            ordinal += 1
             j += 1
             assigned_premutations = []
 
@@ -274,14 +270,16 @@ def compute(config_reader):
 
     printer_conn, subprocess_conn = Pipe()
     printer_connections.append(printer_conn)
+
+    ordinals.append(ordinal)
     test_set_list.add_testset_and_start(
         assign_permutations(
-            config_reader, assigned_premutations, service_buffer, ordianl, subprocess_conn, service_provider))
+            config_reader, assigned_premutations, service_buffer, ordinal, subprocess_conn))
 
     main_process_conn, printer_conn = Pipe()
     PrinterProcess(total_to_analyze, printer_connections, printer_conn).start()
     test_set_list.wait_for_test_ready()
-    main_process_conn.send("ready")
+    main_process_conn.send("stop")
     summarize_results(config_reader, ordinals)
 
 
@@ -347,7 +345,7 @@ def summarize_results(config_reader, ordinals):
     ResultsReader(results_file_name)
 
 
-def assign_permutations(config_reader, assigned_premutations, service_buffer, ordinal, child_conn, service_provider):
+def assign_permutations(config_reader, assigned_premutations, service_buffer, ordinal, child_conn):
     """
     @type service_buffer: ServicesBuffer
     @type config_reader: ConfigReader
@@ -365,7 +363,7 @@ def assign_permutations(config_reader, assigned_premutations, service_buffer, or
 
 def get_results_file_name(config_reader):
     now = datetime.datetime.now()
-    return config_reader.get_property("results_dir") + "/results_" + str(os.getpid()) + "_-" + str(now.day) + "-" + str(now.month) + "-" \
+    return config_reader.get_property("results_dir") + "results_" + str(os.getpid()) + "_-" + str(now.day) + "-" + str(now.month) + "-" \
            + str(now.year) + "_" + str(now.hour) + "_" + str(now.minute) + "-" + str(now.second) + ".dat"
 
 def get_random_id(max, service_id):
