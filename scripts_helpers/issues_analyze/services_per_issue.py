@@ -24,7 +24,7 @@ services_inv = {}
 matrix = []
 
 
-d = open("../resources/R/services_pairs.csv", "r")
+d = open("../resources/R/services_pairs_2_levels-2012.csv", "r")
 
 i = 0
 max_length = 0
@@ -53,6 +53,7 @@ def get_element(row, column):
 
 def complete_line(name):
     dif = (max_length-len(name)) / 2
+    #return name
     return " "*dif + name + " "*dif
 
 for line in d.readlines():
