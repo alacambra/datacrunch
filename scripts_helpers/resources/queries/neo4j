@@ -1,0 +1,18 @@
+start p=node:entities(type="issues"), y=node:entities(uid="year_2013")
+match s2<-[:service]-te2<-[:has_te]-c2<-[:parent]-p-[:parent]->c1-[:has_te]->te1-[:service]->s1, p-[:created_on]->y
+where te1<>te2 and c1<>c2
+return s1.uid, s2.uid, count(s1.uid)
+order by s1.uid, s2.uid;
+
+start p=node:entities(type="issues"), y=node:entities(uid="year_2013")
+match s2<-[:service]-te2<-[:has_te]-c2<-[:parent]-p-[:parent]->c1-[:has_te]->te1-[:service]->s1, p-[:created_on]->y
+where te1<>te2 and c1<>c2
+return s1.uid, s2.uid, count(s1.uid)
+order by s1.uid, s2.uid;
+
+
+start p=node:entities(type="issues") 
+match te2<-[:has_te]-c2<-[:parent]-p-[:parent]->c1-[:books]->te1
+where c1<>c2
+return te1.uid,te2.uid
+limit 10;

@@ -1,0 +1,42 @@
+s1	times
+Urlaub	5
+"Controlling und Reporting"	9
+"Text und Lektorat"	13
+"Motion Design"	15
+Illustration	21
+SEO/SEM	24
+Tracking	26
+"Marketing (intern)"	29
+Software-Design	38
+Key-Account-Management	51
+Flash-Umsetzung	59
+Nebenkosten	119
+Datenbank-Umsetzung	132
+Sonstiges	140
+"Schulung (extern)"	203
+Java-Umsetzung	222
+"Fortbildung (intern)"	244
+"Meeting (extern)"	257
+Dokumentation	374
+Qualitätsmanagement	396
+"Server Administration"	414
+"Konzeption (technisch)"	432
+Intern	594
+Review	680
+Consulting	866
+Anforderungsmanagement	918
+"Konzeption (inhaltlich)"	990
+Recherche	1268
+Deployment	1702
+CMS-Umsetzung	1709
+Javascript-Umsetzung	1944
+PHP-Umsetzung	2060
+Analyse	2251
+Design	2824
+Medienerzeugung	3366
+"Besprechung (intern)"	4792
+Testing	4927
+Contentpflege	5688
+HTML-/CSS-Umsetzung	5963
+Briefing	7296
+Projektmanagement	11539

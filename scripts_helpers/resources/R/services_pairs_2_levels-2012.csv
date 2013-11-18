@@ -1,0 +1,502 @@
+Design,4,Intern
+Design,3,"Server Administration"
+Design,37,Review
+Design,19,PHP-Umsetzung
+Design,2,Nebenkosten
+Design,1,"Meeting (extern)"
+Design,3,"Konzeption (technisch)"
+Design,15,Java-Umsetzung
+Design,20,Javascript-Umsetzung
+Design,42,HTML-/CSS-Umsetzung
+Design,1,"Fortbildung (intern)"
+Design,1,Dokumentation
+Design,3,Consulting
+Design,24,CMS-Umsetzung
+Design,228,Briefing
+Design,27,Analyse
+Design,9,Anforderungsmanagement
+Design,25,Recherche
+Design,23,Medienerzeugung
+Design,12,Deployment
+Design,28,Contentpflege
+Design,28,Testing
+Design,158,Projektmanagement
+Design,53,"Besprechung (intern)"
+Design,31,"Konzeption (inhaltlich)"
+"Konzeption (inhaltlich)",1,Intern
+"Konzeption (inhaltlich)",1,"Server Administration"
+"Konzeption (inhaltlich)",2,Review
+"Konzeption (inhaltlich)",6,PHP-Umsetzung
+"Konzeption (inhaltlich)",4,"Konzeption (technisch)"
+"Konzeption (inhaltlich)",2,Javascript-Umsetzung
+"Konzeption (inhaltlich)",3,HTML-/CSS-Umsetzung
+"Konzeption (inhaltlich)",2,"Fortbildung (intern)"
+"Konzeption (inhaltlich)",1,Dokumentation
+"Konzeption (inhaltlich)",1,CMS-Umsetzung
+"Konzeption (inhaltlich)",12,Briefing
+"Konzeption (inhaltlich)",5,Analyse
+"Konzeption (inhaltlich)",7,Anforderungsmanagement
+"Konzeption (inhaltlich)",4,Recherche
+"Konzeption (inhaltlich)",4,Medienerzeugung
+"Konzeption (inhaltlich)",2,Testing
+"Konzeption (inhaltlich)",14,Projektmanagement
+"Konzeption (inhaltlich)",6,"Besprechung (intern)"
+"Konzeption (inhaltlich)",31,Design
+"Besprechung (intern)",5,Intern
+"Besprechung (intern)",15,"Server Administration"
+"Besprechung (intern)",9,Review
+"Besprechung (intern)",53,PHP-Umsetzung
+"Besprechung (intern)",3,"Meeting (extern)"
+"Besprechung (intern)",17,"Konzeption (technisch)"
+"Besprechung (intern)",66,Javascript-Umsetzung
+"Besprechung (intern)",128,HTML-/CSS-Umsetzung
+"Besprechung (intern)",5,"Fortbildung (intern)"
+"Besprechung (intern)",3,Dokumentation
+"Besprechung (intern)",8,Consulting
+"Besprechung (intern)",64,CMS-Umsetzung
+"Besprechung (intern)",199,Briefing
+"Besprechung (intern)",51,Analyse
+"Besprechung (intern)",7,Anforderungsmanagement
+"Besprechung (intern)",5,Recherche
+"Besprechung (intern)",45,Medienerzeugung
+"Besprechung (intern)",28,Deployment
+"Besprechung (intern)",47,Contentpflege
+"Besprechung (intern)",73,Testing
+"Besprechung (intern)",60,Projektmanagement
+"Besprechung (intern)",6,"Konzeption (inhaltlich)"
+"Besprechung (intern)",53,Design
+Projektmanagement,3,Qualitätsmanagement
+Projektmanagement,3,Intern
+Projektmanagement,5,"Server Administration"
+Projektmanagement,27,Review
+Projektmanagement,33,PHP-Umsetzung
+Projektmanagement,14,"Konzeption (technisch)"
+Projektmanagement,90,Javascript-Umsetzung
+Projektmanagement,114,HTML-/CSS-Umsetzung
+Projektmanagement,5,"Fortbildung (intern)"
+Projektmanagement,3,Dokumentation
+Projektmanagement,5,Consulting
+Projektmanagement,45,CMS-Umsetzung
+Projektmanagement,183,Briefing
+Projektmanagement,39,Analyse
+Projektmanagement,9,Anforderungsmanagement
+Projektmanagement,10,Recherche
+Projektmanagement,43,Medienerzeugung
+Projektmanagement,19,Deployment
+Projektmanagement,60,Contentpflege
+Projektmanagement,85,Testing
+Projektmanagement,60,"Besprechung (intern)"
+Projektmanagement,14,"Konzeption (inhaltlich)"
+Projektmanagement,158,Design
+Testing,3,Qualitätsmanagement
+Testing,9,Intern
+Testing,5,"Server Administration"
+Testing,31,Review
+Testing,69,PHP-Umsetzung
+Testing,1,Nebenkosten
+Testing,25,"Konzeption (technisch)"
+Testing,164,Javascript-Umsetzung
+Testing,222,HTML-/CSS-Umsetzung
+Testing,3,"Fortbildung (intern)"
+Testing,1,Dokumentation
+Testing,4,Consulting
+Testing,84,CMS-Umsetzung
+Testing,193,Briefing
+Testing,84,Analyse
+Testing,10,Anforderungsmanagement
+Testing,53,Medienerzeugung
+Testing,51,Deployment
+Testing,84,Contentpflege
+Testing,85,Projektmanagement
+Testing,73,"Besprechung (intern)"
+Testing,2,"Konzeption (inhaltlich)"
+Testing,28,Design
+Contentpflege,6,"Server Administration"
+Contentpflege,4,Review
+Contentpflege,25,PHP-Umsetzung
+Contentpflege,2,Nebenkosten
+Contentpflege,3,"Konzeption (technisch)"
+Contentpflege,41,Javascript-Umsetzung
+Contentpflege,151,HTML-/CSS-Umsetzung
+Contentpflege,1,Dokumentation
+Contentpflege,5,Consulting
+Contentpflege,36,CMS-Umsetzung
+Contentpflege,331,Briefing
+Contentpflege,27,Analyse
+Contentpflege,3,Anforderungsmanagement
+Contentpflege,84,Medienerzeugung
+Contentpflege,16,Deployment
+Contentpflege,84,Testing
+Contentpflege,60,Projektmanagement
+Contentpflege,47,"Besprechung (intern)"
+Contentpflege,28,Design
+Deployment,6,Intern
+Deployment,2,"Server Administration"
+Deployment,2,Review
+Deployment,42,PHP-Umsetzung
+Deployment,13,"Konzeption (technisch)"
+Deployment,11,Java-Umsetzung
+Deployment,54,Javascript-Umsetzung
+Deployment,73,HTML-/CSS-Umsetzung
+Deployment,3,Consulting
+Deployment,55,CMS-Umsetzung
+Deployment,32,Briefing
+Deployment,47,Analyse
+Deployment,5,Anforderungsmanagement
+Deployment,10,Medienerzeugung
+Deployment,16,Contentpflege
+Deployment,51,Testing
+Deployment,19,Projektmanagement
+Deployment,28,"Besprechung (intern)"
+Deployment,12,Design
+Medienerzeugung,1,Qualitätsmanagement
+Medienerzeugung,1,Intern
+Medienerzeugung,8,"Server Administration"
+Medienerzeugung,15,Review
+Medienerzeugung,15,PHP-Umsetzung
+Medienerzeugung,1,Nebenkosten
+Medienerzeugung,1,"Meeting (extern)"
+Medienerzeugung,6,"Konzeption (technisch)"
+Medienerzeugung,55,Javascript-Umsetzung
+Medienerzeugung,132,HTML-/CSS-Umsetzung
+Medienerzeugung,1,"Fortbildung (intern)"
+Medienerzeugung,2,Dokumentation
+Medienerzeugung,4,Consulting
+Medienerzeugung,40,CMS-Umsetzung
+Medienerzeugung,216,Briefing
+Medienerzeugung,21,Analyse
+Medienerzeugung,5,Anforderungsmanagement
+Medienerzeugung,2,Recherche
+Medienerzeugung,10,Deployment
+Medienerzeugung,84,Contentpflege
+Medienerzeugung,53,Testing
+Medienerzeugung,43,Projektmanagement
+Medienerzeugung,45,"Besprechung (intern)"
+Medienerzeugung,4,"Konzeption (inhaltlich)"
+Medienerzeugung,23,Design
+Recherche,1,"Server Administration"
+Recherche,3,Review
+Recherche,2,PHP-Umsetzung
+Recherche,1,Javascript-Umsetzung
+Recherche,2,HTML-/CSS-Umsetzung
+Recherche,1,"Fortbildung (intern)"
+Recherche,2,Dokumentation
+Recherche,2,CMS-Umsetzung
+Recherche,9,Briefing
+Recherche,2,Analyse
+Recherche,1,Anforderungsmanagement
+Recherche,2,Medienerzeugung
+Recherche,10,Projektmanagement
+Recherche,5,"Besprechung (intern)"
+Recherche,4,"Konzeption (inhaltlich)"
+Recherche,25,Design
+Anforderungsmanagement,1,Intern
+Anforderungsmanagement,3,Review
+Anforderungsmanagement,7,PHP-Umsetzung
+Anforderungsmanagement,4,"Konzeption (technisch)"
+Anforderungsmanagement,10,Javascript-Umsetzung
+Anforderungsmanagement,13,HTML-/CSS-Umsetzung
+Anforderungsmanagement,10,CMS-Umsetzung
+Anforderungsmanagement,17,Briefing
+Anforderungsmanagement,8,Analyse
+Anforderungsmanagement,1,Recherche
+Anforderungsmanagement,5,Medienerzeugung
+Anforderungsmanagement,5,Deployment
+Anforderungsmanagement,3,Contentpflege
+Anforderungsmanagement,10,Testing
+Anforderungsmanagement,9,Projektmanagement
+Anforderungsmanagement,7,"Besprechung (intern)"
+Anforderungsmanagement,7,"Konzeption (inhaltlich)"
+Anforderungsmanagement,9,Design
+Analyse,7,Intern
+Analyse,6,"Server Administration"
+Analyse,11,Review
+Analyse,68,PHP-Umsetzung
+Analyse,1,"Meeting (extern)"
+Analyse,28,"Konzeption (technisch)"
+Analyse,11,Java-Umsetzung
+Analyse,77,Javascript-Umsetzung
+Analyse,109,HTML-/CSS-Umsetzung
+Analyse,4,"Fortbildung (intern)"
+Analyse,1,Dokumentation
+Analyse,5,Consulting
+Analyse,75,CMS-Umsetzung
+Analyse,99,Briefing
+Analyse,8,Anforderungsmanagement
+Analyse,2,Recherche
+Analyse,21,Medienerzeugung
+Analyse,47,Deployment
+Analyse,27,Contentpflege
+Analyse,84,Testing
+Analyse,39,Projektmanagement
+Analyse,51,"Besprechung (intern)"
+Analyse,5,"Konzeption (inhaltlich)"
+Analyse,27,Design
+Briefing,4,Qualitätsmanagement
+Briefing,5,Intern
+Briefing,17,"Server Administration"
+Briefing,36,Review
+Briefing,69,PHP-Umsetzung
+Briefing,3,"Meeting (extern)"
+Briefing,18,"Konzeption (technisch)"
+Briefing,153,Javascript-Umsetzung
+Briefing,462,HTML-/CSS-Umsetzung
+Briefing,2,"Fortbildung (intern)"
+Briefing,8,Dokumentation
+Briefing,15,Consulting
+Briefing,117,CMS-Umsetzung
+Briefing,99,Analyse
+Briefing,17,Anforderungsmanagement
+Briefing,9,Recherche
+Briefing,216,Medienerzeugung
+Briefing,32,Deployment
+Briefing,331,Contentpflege
+Briefing,193,Testing
+Briefing,183,Projektmanagement
+Briefing,199,"Besprechung (intern)"
+Briefing,12,"Konzeption (inhaltlich)"
+Briefing,228,Design
+CMS-Umsetzung,7,Intern
+CMS-Umsetzung,11,"Server Administration"
+CMS-Umsetzung,10,Review
+CMS-Umsetzung,66,PHP-Umsetzung
+CMS-Umsetzung,1,"Meeting (extern)"
+CMS-Umsetzung,22,"Konzeption (technisch)"
+CMS-Umsetzung,92,Javascript-Umsetzung
+CMS-Umsetzung,122,HTML-/CSS-Umsetzung
+CMS-Umsetzung,2,"Fortbildung (intern)"
+CMS-Umsetzung,10,Consulting
+CMS-Umsetzung,117,Briefing
+CMS-Umsetzung,75,Analyse
+CMS-Umsetzung,10,Anforderungsmanagement
+CMS-Umsetzung,2,Recherche
+CMS-Umsetzung,40,Medienerzeugung
+CMS-Umsetzung,55,Deployment
+CMS-Umsetzung,36,Contentpflege
+CMS-Umsetzung,84,Testing
+CMS-Umsetzung,45,Projektmanagement
+CMS-Umsetzung,64,"Besprechung (intern)"
+CMS-Umsetzung,1,"Konzeption (inhaltlich)"
+CMS-Umsetzung,24,Design
+Consulting,3,"Server Administration"
+Consulting,4,PHP-Umsetzung
+Consulting,2,"Konzeption (technisch)"
+Consulting,8,Javascript-Umsetzung
+Consulting,9,HTML-/CSS-Umsetzung
+Consulting,1,"Fortbildung (intern)"
+Consulting,10,CMS-Umsetzung
+Consulting,15,Briefing
+Consulting,5,Analyse
+Consulting,4,Medienerzeugung
+Consulting,3,Deployment
+Consulting,5,Contentpflege
+Consulting,4,Testing
+Consulting,5,Projektmanagement
+Consulting,8,"Besprechung (intern)"
+Consulting,3,Design
+Dokumentation,1,Review
+Dokumentation,1,PHP-Umsetzung
+Dokumentation,1,Javascript-Umsetzung
+Dokumentation,2,HTML-/CSS-Umsetzung
+Dokumentation,8,Briefing
+Dokumentation,1,Analyse
+Dokumentation,2,Recherche
+Dokumentation,2,Medienerzeugung
+Dokumentation,1,Contentpflege
+Dokumentation,1,Testing
+Dokumentation,3,Projektmanagement
+Dokumentation,3,"Besprechung (intern)"
+Dokumentation,1,"Konzeption (inhaltlich)"
+Dokumentation,1,Design
+"Fortbildung (intern)",2,"Server Administration"
+"Fortbildung (intern)",1,Review
+"Fortbildung (intern)",5,PHP-Umsetzung
+"Fortbildung (intern)",2,"Konzeption (technisch)"
+"Fortbildung (intern)",4,Java-Umsetzung
+"Fortbildung (intern)",1,Javascript-Umsetzung
+"Fortbildung (intern)",3,HTML-/CSS-Umsetzung
+"Fortbildung (intern)",1,Consulting
+"Fortbildung (intern)",2,CMS-Umsetzung
+"Fortbildung (intern)",2,Briefing
+"Fortbildung (intern)",4,Analyse
+"Fortbildung (intern)",1,Recherche
+"Fortbildung (intern)",1,Medienerzeugung
+"Fortbildung (intern)",3,Testing
+"Fortbildung (intern)",5,Projektmanagement
+"Fortbildung (intern)",5,"Besprechung (intern)"
+"Fortbildung (intern)",2,"Konzeption (inhaltlich)"
+"Fortbildung (intern)",1,Design
+HTML-/CSS-Umsetzung,2,Qualitätsmanagement
+HTML-/CSS-Umsetzung,9,Intern
+HTML-/CSS-Umsetzung,14,"Server Administration"
+HTML-/CSS-Umsetzung,37,Review
+HTML-/CSS-Umsetzung,91,PHP-Umsetzung
+HTML-/CSS-Umsetzung,1,Nebenkosten
+HTML-/CSS-Umsetzung,1,"Meeting (extern)"
+HTML-/CSS-Umsetzung,30,"Konzeption (technisch)"
+HTML-/CSS-Umsetzung,5,Java-Umsetzung
+HTML-/CSS-Umsetzung,278,Javascript-Umsetzung
+HTML-/CSS-Umsetzung,3,"Fortbildung (intern)"
+HTML-/CSS-Umsetzung,2,Dokumentation
+HTML-/CSS-Umsetzung,9,Consulting
+HTML-/CSS-Umsetzung,122,CMS-Umsetzung
+HTML-/CSS-Umsetzung,462,Briefing
+HTML-/CSS-Umsetzung,109,Analyse
+HTML-/CSS-Umsetzung,13,Anforderungsmanagement
+HTML-/CSS-Umsetzung,2,Recherche
+HTML-/CSS-Umsetzung,132,Medienerzeugung
+HTML-/CSS-Umsetzung,73,Deployment
+HTML-/CSS-Umsetzung,151,Contentpflege
+HTML-/CSS-Umsetzung,222,Testing
+HTML-/CSS-Umsetzung,114,Projektmanagement
+HTML-/CSS-Umsetzung,128,"Besprechung (intern)"
+HTML-/CSS-Umsetzung,3,"Konzeption (inhaltlich)"
+HTML-/CSS-Umsetzung,42,Design
+Javascript-Umsetzung,8,Intern
+Javascript-Umsetzung,4,"Server Administration"
+Javascript-Umsetzung,47,Review
+Javascript-Umsetzung,66,PHP-Umsetzung
+Javascript-Umsetzung,24,"Konzeption (technisch)"
+Javascript-Umsetzung,5,Java-Umsetzung
+Javascript-Umsetzung,278,HTML-/CSS-Umsetzung
+Javascript-Umsetzung,1,"Fortbildung (intern)"
+Javascript-Umsetzung,1,Dokumentation
+Javascript-Umsetzung,8,Consulting
+Javascript-Umsetzung,92,CMS-Umsetzung
+Javascript-Umsetzung,153,Briefing
+Javascript-Umsetzung,77,Analyse
+Javascript-Umsetzung,10,Anforderungsmanagement
+Javascript-Umsetzung,1,Recherche
+Javascript-Umsetzung,55,Medienerzeugung
+Javascript-Umsetzung,54,Deployment
+Javascript-Umsetzung,41,Contentpflege
+Javascript-Umsetzung,164,Testing
+Javascript-Umsetzung,90,Projektmanagement
+Javascript-Umsetzung,66,"Besprechung (intern)"
+Javascript-Umsetzung,2,"Konzeption (inhaltlich)"
+Javascript-Umsetzung,20,Design
+Java-Umsetzung,5,Javascript-Umsetzung
+Java-Umsetzung,5,HTML-/CSS-Umsetzung
+Java-Umsetzung,4,"Fortbildung (intern)"
+Java-Umsetzung,11,Analyse
+Java-Umsetzung,11,Deployment
+Java-Umsetzung,15,Design
+"Konzeption (technisch)",2,Intern
+"Konzeption (technisch)",3,"Server Administration"
+"Konzeption (technisch)",1,Review
+"Konzeption (technisch)",29,PHP-Umsetzung
+"Konzeption (technisch)",24,Javascript-Umsetzung
+"Konzeption (technisch)",30,HTML-/CSS-Umsetzung
+"Konzeption (technisch)",2,"Fortbildung (intern)"
+"Konzeption (technisch)",2,Consulting
+"Konzeption (technisch)",22,CMS-Umsetzung
+"Konzeption (technisch)",18,Briefing
+"Konzeption (technisch)",28,Analyse
+"Konzeption (technisch)",4,Anforderungsmanagement
+"Konzeption (technisch)",6,Medienerzeugung
+"Konzeption (technisch)",13,Deployment
+"Konzeption (technisch)",3,Contentpflege
+"Konzeption (technisch)",25,Testing
+"Konzeption (technisch)",14,Projektmanagement
+"Konzeption (technisch)",17,"Besprechung (intern)"
+"Konzeption (technisch)",4,"Konzeption (inhaltlich)"
+"Konzeption (technisch)",3,Design
+"Meeting (extern)",1,"Server Administration"
+"Meeting (extern)",2,PHP-Umsetzung
+"Meeting (extern)",1,HTML-/CSS-Umsetzung
+"Meeting (extern)",1,CMS-Umsetzung
+"Meeting (extern)",3,Briefing
+"Meeting (extern)",1,Analyse
+"Meeting (extern)",1,Medienerzeugung
+"Meeting (extern)",3,"Besprechung (intern)"
+"Meeting (extern)",1,Design
+Nebenkosten,1,HTML-/CSS-Umsetzung
+Nebenkosten,1,Medienerzeugung
+Nebenkosten,2,Contentpflege
+Nebenkosten,1,Testing
+Nebenkosten,2,Design
+PHP-Umsetzung,2,Qualitätsmanagement
+PHP-Umsetzung,8,Intern
+PHP-Umsetzung,7,"Server Administration"
+PHP-Umsetzung,4,Review
+PHP-Umsetzung,2,"Meeting (extern)"
+PHP-Umsetzung,29,"Konzeption (technisch)"
+PHP-Umsetzung,66,Javascript-Umsetzung
+PHP-Umsetzung,91,HTML-/CSS-Umsetzung
+PHP-Umsetzung,5,"Fortbildung (intern)"
+PHP-Umsetzung,1,Dokumentation
+PHP-Umsetzung,4,Consulting
+PHP-Umsetzung,66,CMS-Umsetzung
+PHP-Umsetzung,69,Briefing
+PHP-Umsetzung,68,Analyse
+PHP-Umsetzung,7,Anforderungsmanagement
+PHP-Umsetzung,2,Recherche
+PHP-Umsetzung,15,Medienerzeugung
+PHP-Umsetzung,42,Deployment
+PHP-Umsetzung,25,Contentpflege
+PHP-Umsetzung,69,Testing
+PHP-Umsetzung,33,Projektmanagement
+PHP-Umsetzung,53,"Besprechung (intern)"
+PHP-Umsetzung,6,"Konzeption (inhaltlich)"
+PHP-Umsetzung,19,Design
+Review,2,"Server Administration"
+Review,4,PHP-Umsetzung
+Review,1,"Konzeption (technisch)"
+Review,47,Javascript-Umsetzung
+Review,37,HTML-/CSS-Umsetzung
+Review,1,"Fortbildung (intern)"
+Review,1,Dokumentation
+Review,10,CMS-Umsetzung
+Review,36,Briefing
+Review,11,Analyse
+Review,3,Anforderungsmanagement
+Review,3,Recherche
+Review,15,Medienerzeugung
+Review,2,Deployment
+Review,4,Contentpflege
+Review,31,Testing
+Review,27,Projektmanagement
+Review,9,"Besprechung (intern)"
+Review,2,"Konzeption (inhaltlich)"
+Review,37,Design
+"Server Administration",2,Review
+"Server Administration",7,PHP-Umsetzung
+"Server Administration",1,"Meeting (extern)"
+"Server Administration",3,"Konzeption (technisch)"
+"Server Administration",4,Javascript-Umsetzung
+"Server Administration",14,HTML-/CSS-Umsetzung
+"Server Administration",2,"Fortbildung (intern)"
+"Server Administration",3,Consulting
+"Server Administration",11,CMS-Umsetzung
+"Server Administration",17,Briefing
+"Server Administration",6,Analyse
+"Server Administration",1,Recherche
+"Server Administration",8,Medienerzeugung
+"Server Administration",2,Deployment
+"Server Administration",6,Contentpflege
+"Server Administration",5,Testing
+"Server Administration",5,Projektmanagement
+"Server Administration",15,"Besprechung (intern)"
+"Server Administration",1,"Konzeption (inhaltlich)"
+"Server Administration",3,Design
+Intern,8,PHP-Umsetzung
+Intern,2,"Konzeption (technisch)"
+Intern,8,Javascript-Umsetzung
+Intern,9,HTML-/CSS-Umsetzung
+Intern,7,CMS-Umsetzung
+Intern,5,Briefing
+Intern,7,Analyse
+Intern,1,Anforderungsmanagement
+Intern,1,Medienerzeugung
+Intern,6,Deployment
+Intern,9,Testing
+Intern,3,Projektmanagement
+Intern,5,"Besprechung (intern)"
+Intern,1,"Konzeption (inhaltlich)"
+Intern,4,Design
+Qualitätsmanagement,2,PHP-Umsetzung
+Qualitätsmanagement,2,HTML-/CSS-Umsetzung
+Qualitätsmanagement,4,Briefing
+Qualitätsmanagement,1,Medienerzeugung
+Qualitätsmanagement,3,Testing
+Qualitätsmanagement,3,Projektmanagement
