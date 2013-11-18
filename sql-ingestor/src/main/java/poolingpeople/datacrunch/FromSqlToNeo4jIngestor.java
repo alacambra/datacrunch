@@ -1,22 +1,25 @@
 package poolingpeople.datacrunch;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.persistence.Column;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.transform.ToListResultTransformer;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+//import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.index.IndexHits;
+import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import poolingpeople.datacrunch.redmine.Enumerations;
 import poolingpeople.datacrunch.redmine.IsRedmineEntity;
@@ -27,14 +30,15 @@ import poolingpeople.datacrunch.redmine.Users;
 public class FromSqlToNeo4jIngestor {
 
 	static GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( "target/neo4j-all" );
-
+//	static GraphDatabaseService graphDb = new EmbeddedGraphDatabase("target/neo4j-all");
+	
 	public static void main(String[] args) {
 		System.out.println("starting...");
 
 		Transaction tx = graphDb.beginTx();
 		try {
 			FromSqlToNeo4jIngestor ingestor = new FromSqlToNeo4jIngestor();
-			ingest();
+			ingestNodes();
 			System.out.println("Issues hierarchy");
 			ingestor.buildIssuerHierarchy();
 			System.out.println("Time entries hierarchies");
@@ -52,7 +56,7 @@ public class FromSqlToNeo4jIngestor {
 
 	}
 
-	public static void ingest() {
+	public static void ingestNodes() {
 		FromSqlToNeo4jIngestor ingestor = new FromSqlToNeo4jIngestor();
 		System.out.println("Loading redmine entities");
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -98,7 +102,34 @@ public class FromSqlToNeo4jIngestor {
 			ingestor.convert(te);
 		}
 
+		ingestor.loadDatesNodes();
 		System.out.println("succes");
+	}
+
+	private void loadDatesNodes() {
+		for(int i = 2009; i<2015; i++) {
+			Node node = graphDb.createNode();
+			String uid = "year_" + i;
+			node.setProperty("uid", uid);
+			graphDb.index().forNodes("entities").add(node, "type", "year");
+			graphDb.index().forNodes("entities").add(node, "uid", uid);
+		}
+
+		for(int i = 1; i<32; i++) {
+			Node node = graphDb.createNode();
+			String uid = "day_" + i;
+			node.setProperty("uid", uid);
+			graphDb.index().forNodes("entities").add(node, "type", "day");
+			graphDb.index().forNodes("entities").add(node, "uid", uid);
+		}
+
+		for(int i = 1; i<32; i++) {
+			Node node = graphDb.createNode();
+			String uid = "month_" + i;
+			node.setProperty("uid", uid);
+			graphDb.index().forNodes("entities").add(node, "type", "month");
+			graphDb.index().forNodes("entities").add(node, "uid", uid);
+		}		
 	}
 
 	public static void test() {
@@ -149,6 +180,7 @@ public class FromSqlToNeo4jIngestor {
 
 	public void buildIssuerHierarchy() {
 		IndexHits<Node> nHits = graphDb.index().forNodes("entities").get("type", "issues");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
 
 		for(Node child : nHits) {
 			if (child.hasProperty("parentId")) {
@@ -174,22 +206,58 @@ public class FromSqlToNeo4jIngestor {
 					};
 				});
 			}
+
+			if (child.hasProperty("createdOn")) {
+
+				String date = (String) child.getProperty("createdOn");
+
+				try {
+					Date d = sdf.parse(date);
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(d);
+					int day = cal.get(Calendar.DAY_OF_MONTH);
+					int month = cal.get(Calendar.MONTH) + 1;
+					int year = cal.get(Calendar.YEAR);
+
+					Node dayNode = loadNode("day_" + day);
+					Node monthNode = loadNode("month_" + month);
+					Node yearNode = loadNode("year_" + year);
+
+					RelationshipType rel = new RelationshipType(){
+						public String name(){
+							return "created_on";
+						};
+					};
+					try {
+						child.createRelationshipTo(dayNode, rel);
+						child.createRelationshipTo(monthNode, rel);
+						child.createRelationshipTo(yearNode, rel);
+					} catch (IllegalArgumentException e) {
+						throw e;
+					}
+
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+
+			}
 		}
 	}
-	
+
 	public void buildTimeEntries() {
-		
+
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		session.beginTransaction();
 		Criteria criteria = session.createCriteria(Enumerations.class);
 		List<Enumerations> enumerations = criteria.list();
 		session.getTransaction().commit();
 		HashMap<Integer, String> services = new HashMap<Integer, String>();
-		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
 		for(Enumerations enumeration : enumerations) {
 			services.put(enumeration.getId(), enumeration.getName());
 		}
-		
+
 		IndexHits<Node> nHits = graphDb.index().forNodes("entities").get("type", "timeentries");
 		for(Node te : nHits) {
 			if (te.hasProperty("issueId")) {
@@ -215,9 +283,9 @@ public class FromSqlToNeo4jIngestor {
 					};
 				});
 			}
-			
+
 			if (te.hasProperty("activityId")) {
-				
+
 				String uid = services.get(Integer.parseInt((String) te.getProperty("activityId")));
 
 				Node service = loadNode(uid);
@@ -226,7 +294,43 @@ public class FromSqlToNeo4jIngestor {
 						return "service";
 					};
 				}).setProperty("hours", Float.parseFloat((String) te.getProperty("hours")));
-				
+
+			}
+
+			if (te.hasProperty("spentOn")) {
+
+				String date = (String) te.getProperty("spentOn");
+
+				try {
+					Date d = sdf.parse(date);
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(d);
+					int day = cal.get(Calendar.DAY_OF_MONTH);
+					int month = cal.get(Calendar.MONTH) + 1;
+					int year = cal.get(Calendar.YEAR);
+
+					Node dayNode = loadNode("day_" + day);
+					Node monthNode = loadNode("month_" + month);
+					Node yearNode = loadNode("year_" + year);
+
+					RelationshipType rel = new RelationshipType(){
+						public String name(){
+							return "spent_on";
+						};
+					};
+					
+					try {
+						te.createRelationshipTo(dayNode, rel);
+						te.createRelationshipTo(monthNode, rel);
+						te.createRelationshipTo(yearNode, rel);
+					} catch (IllegalArgumentException e) {
+						throw e;
+					}
+
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+
 			}
 		}
 	}
@@ -247,30 +351,48 @@ public class FromSqlToNeo4jIngestor {
 
 }
 
-//
-//public Node createNode(Map<String, Object> properties, MetaNodeType metaNodeType ) throws PersistanceException {
-//
-//	Node node = graphDb.createNode();
-//	UUIDIndex uuid = UUIDIndex.generate();
-//
-//	if (nodeExist(uuid)) {
-//		throw new PersistanceException("Node " + uuid + " already exists and can not be created again");
-//	}
-//
-//	MetaTypeIndex metaTypeIndex = new MetaTypeIndex(metaNodeType.name());
-//	setProperty(node, metaTypeIndex.getIndexKey(), metaNodeType.name());
-//
-//	node.setProperty(uuid.getIndexKey(), uuid.getValue());
-//
-//	graphDb.index()
-//	.forNodes(metaTypeIndex.getIndexName())
-//	.add( node, metaTypeIndex.getIndexKey(), metaTypeIndex.getValue());
-//
-//	graphDb.index().forNodes(uuid.getIndexName()).add(node, uuid.getIndexKey(), uuid.getValue());
-//
-//	for (Entry<String, Object> prop : properties.entrySet()) {
-//		node.setProperty(prop.getKey(), prop.getValue());
-//	}
-//
-//	return node;
-//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
