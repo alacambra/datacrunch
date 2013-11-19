@@ -1,9 +1,7 @@
 import MySQLdb
 from multiprocessing import Pipe
-import nltk
-from pandas.io.parsers import _clean_index_names
 
-from py2neo import neo4j, node, rel
+from py2neo import neo4j, node
 from py2neo.neo4j import WriteBatch
 
 from models import *

@@ -1,8 +1,12 @@
+//
+
 start p=node:entities(type="issues"), y=node:entities(uid="year_2013")
 match s2<-[:service]-te2<-[:has_te]-c2<-[:parent]-p-[:parent]->c1-[:has_te]->te1-[:service]->s1, p-[:created_on]->y
-where te1<>te2 and c1<>c2
-return s1.uid, s2.uid, count(s1.uid)
-order by s1.uid, s2.uid;
+where c1<>c2 and s1 <> s2 and id(s1)<>17289 and id(s1)<>17250 and id(s2)<>17289 and id(s2)<>17250
+return s1, s2, count(s2.uid) as total
+order by total DESC, s1.uid, s2.uid
+limit 6;
+
 
 start p=node:entities(type="issues"), y=node:entities(uid="year_2013")
 match s2<-[:service]-te2<-[:has_te]-c2<-[:parent]-p-[:parent]->c1-[:has_te]->te1-[:service]->s1, p-[:created_on]->y
@@ -16,3 +20,47 @@ match te2<-[:has_te]-c2<-[:parent]-p-[:parent]->c1-[:books]->te1
 where c1<>c2
 return te1.uid,te2.uid
 limit 10;
+
+start c1=node:entities(type="issues"), y=node:entities(uid="year_2013")
+match c1-[:has_te]->te1-[:service]->s1, c1-[:created_on]->y
+with s1, count(s1.uid) as num_of_uses, sum(te1.hours) as hours_of_use
+return s1, num_of_uses, hours_of_use, (hours_of_use / num_of_uses) as avg_time_of_use_per_use
+order by avg_time_of_use_per_use
+
+
+//services booked by a creator (same issue)
+start u=node:entities(type="users")
+match u-[:creates]->i-[:has_te]->te<-[:books]-u, te-[:service]->s
+return s, count(s) as total
+order by total DESC;
+
+
+//services booked by user
+start u=node:entities(type="users")
+match s-[:service]-te<-[:books]-u
+return s, u.login, count(u) as bookings_per_user
+order by u.login DESC, s.uid;
+
+start u=node:entities(type="users")
+match s-[:service]-te<-[:books]-u
+where u.login="Klaus"
+return s, u.login, count(u) as bookings_per_user
+order by bookings_per_user DESC;
+ 
+
+//issues created by user
+start u=node:entities(type="users"), y=node:entities(uid="year_2013")
+match u-[:creates]->i<-[:created_on]->y
+return u.login, count(u) as creations_per_user
+order by creations_per_user DESC;
+
+start u=node:entities(type="users")
+match u-[:creates]->i
+where i.year > 2012
+return u.login, count(u) as creations_per_user
+order by creations_per_user DESC;
+
+start s=node(17249), y=node:entities(uid="year_2013")
+match s<-[:service]-te<-[:books]-u, te-[:spent_on]->y
+return s, u.login, count(u) as total
+order by total desc

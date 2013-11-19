@@ -1,12 +1,12 @@
-from py2neo import neo4j
 import os
+
+from py2neo import neo4j
+
 #from py2neo import tool
 import tool2 as tool
-import CypherCreator as qc
 import QueryFetcher as qf
 import NamesCounter as nc
 import re
-from redmine_model import Issue as iss
 
 uri = "http://marceli:7474/db/data";
 graph_db = neo4j.GraphDatabaseService(uri);

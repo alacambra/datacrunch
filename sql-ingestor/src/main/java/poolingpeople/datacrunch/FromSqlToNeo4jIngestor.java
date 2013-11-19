@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -169,7 +168,16 @@ public class FromSqlToNeo4jIngestor {
 			try {
 				Object value = fields[i].get(entity);
 				if (value != null) {
-					node.setProperty(fields[i].getName(), value.toString());
+					try {
+						value = Integer.parseInt(value.toString());
+					} catch (NumberFormatException e){
+						try {
+							value = Float.parseFloat(value.toString());
+						} catch (NumberFormatException e1){
+							value = value.toString();
+						}
+					}
+					node.setProperty(fields[i].getName(), value);
 				}
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
@@ -185,7 +193,7 @@ public class FromSqlToNeo4jIngestor {
 		for(Node child : nHits) {
 			if (child.hasProperty("parentId")) {
 				String uid = generateUUid(
-						Issues.class.getSimpleName().toLowerCase(), Integer.parseInt((String) child.getProperty("parentId")));
+						Issues.class.getSimpleName().toLowerCase(), (Integer) child.getProperty("parentId"));
 
 				Node parent = loadNode(uid);
 				parent.createRelationshipTo(child, new RelationshipType(){
@@ -197,7 +205,7 @@ public class FromSqlToNeo4jIngestor {
 
 			if (child.hasProperty("authorId")) {
 				String uid = generateUUid(
-						Users.class.getSimpleName().toLowerCase(), Integer.parseInt((String) child.getProperty("authorId")));
+						Users.class.getSimpleName().toLowerCase(), (Integer) child.getProperty("authorId"));
 
 				Node user = loadNode(uid);
 				user.createRelationshipTo(child, new RelationshipType(){
@@ -210,7 +218,7 @@ public class FromSqlToNeo4jIngestor {
 			if (child.hasProperty("createdOn")) {
 
 				String date = (String) child.getProperty("createdOn");
-
+				
 				try {
 					Date d = sdf.parse(date);
 					Calendar cal = Calendar.getInstance();
@@ -218,6 +226,10 @@ public class FromSqlToNeo4jIngestor {
 					int day = cal.get(Calendar.DAY_OF_MONTH);
 					int month = cal.get(Calendar.MONTH) + 1;
 					int year = cal.get(Calendar.YEAR);
+					
+					child.setProperty("year", year);
+					child.setProperty("month", month);
+					child.setProperty("day", day);
 
 					Node dayNode = loadNode("day_" + day);
 					Node monthNode = loadNode("month_" + month);
@@ -262,7 +274,7 @@ public class FromSqlToNeo4jIngestor {
 		for(Node te : nHits) {
 			if (te.hasProperty("issueId")) {
 				String uid = generateUUid(
-						Issues.class.getSimpleName().toLowerCase(), Integer.parseInt((String) te.getProperty("issueId")));
+						Issues.class.getSimpleName().toLowerCase(), (Integer) te.getProperty("issueId"));
 
 				Node issue = loadNode(uid);
 				issue.createRelationshipTo(te, new RelationshipType(){
@@ -274,7 +286,7 @@ public class FromSqlToNeo4jIngestor {
 
 			if (te.hasProperty("userId")) {
 				String uid = generateUUid(
-						Users.class.getSimpleName().toLowerCase(), Integer.parseInt((String) te.getProperty("userId")));
+						Users.class.getSimpleName().toLowerCase(), (Integer) te.getProperty("userId"));
 
 				Node user = loadNode(uid);
 				user.createRelationshipTo(te, new RelationshipType(){
@@ -286,14 +298,14 @@ public class FromSqlToNeo4jIngestor {
 
 			if (te.hasProperty("activityId")) {
 
-				String uid = services.get(Integer.parseInt((String) te.getProperty("activityId")));
+				String uid = services.get((Integer)te.getProperty("activityId"));
 
 				Node service = loadNode(uid);
 				te.createRelationshipTo(service, new RelationshipType(){
 					public String name(){
 						return "service";
 					};
-				}).setProperty("hours", Float.parseFloat((String) te.getProperty("hours")));
+				}).setProperty("hours", (Float)te.getProperty("hours"));
 
 			}
 
@@ -312,6 +324,10 @@ public class FromSqlToNeo4jIngestor {
 					Node dayNode = loadNode("day_" + day);
 					Node monthNode = loadNode("month_" + month);
 					Node yearNode = loadNode("year_" + year);
+					
+					te.setProperty("year", year);
+					te.setProperty("month", month);
+					te.setProperty("day", day);
 
 					RelationshipType rel = new RelationshipType(){
 						public String name(){
