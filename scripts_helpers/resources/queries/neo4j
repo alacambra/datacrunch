@@ -2,7 +2,7 @@
 
 start p=node:entities(type="issues"), y=node:entities(uid="year_2013")
 match s2<-[:service]-te2<-[:has_te]-c2<-[:parent]-p-[:parent]->c1-[:has_te]->te1-[:service]->s1, p-[:created_on]->y
-where c1<>c2 and s1 <> s2 and id(s1)<>17289 and id(s1)<>17250 and id(s2)<>17289 and id(s2)<>17250
+where c1<>c2 and s1 <> s2 //and id(s1)<>17289 and id(s1)<>17250 and id(s2)<>17289 and id(s2)<>17250
 return s1, s2, count(s2.uid) as total
 order by total DESC, s1.uid, s2.uid
 limit 6;
@@ -64,3 +64,57 @@ start s=node(17249), y=node:entities(uid="year_2013")
 match s<-[:service]-te<-[:books]-u, te-[:spent_on]->y
 return s, u.login, count(u) as total
 order by total desc
+
+
+//locate tripllets services
+start s=node:entities(type="service")
+match s1<--te1--i--te2-->s2<--te2<--i-->te3-->s3
+return s1,s2,s3
+
+
+start i=node:entities(type="issues")
+match s1<--te1--i, i--te2-->s2, i-->te3-->s3
+where te1<>te2 and te1<>te3 and te2<>te3 and s1<>s2 and s1<>s3 and s2<>s3
+return s1,s2,s3
+
+start i=node:entities(type="issues")
+match s1<--te1--i, i--te2-->s2, i-->te3-->s3
+where te1<>te2 and te1<>te3 and te2<>te3 and s1<>s2 and s1<>s3 and s2<>s3
+return s1,s2,s3, count(s1), count(s2), count(s3)
+
+start s=node:entities(type="service")
+match s1<--te1--i
+with s1,te1,i
+match  i--te2-->s2,
+where te1<>te2 and s1<>s2
+with  s1,te1,i, s2,te2
+match  i--te3-->s3,
+where te1<>te3 and te2<>te3 and s1<>s3 and s2<>s3
+return s1,s2,s3
+
+start s=node:entities(type="service")
+match s1<--te1--i
+return s1,te1,i
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

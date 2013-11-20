@@ -1,0 +1,10 @@
+#!/bin/bash
+#head -n6 neo4j | tail -n 6 | neotool cypher
+#lf start end file
+let lines=$3-$2+1
+echo "-----------------------------------"
+head -n$3 $1 | tail -n$lines > tmp
+cat tmp
+echo "-----------------------------------"
+cat tmp | neotool cypher 
+#head -n$3 $1 | tail -n$lines | neotool cypher

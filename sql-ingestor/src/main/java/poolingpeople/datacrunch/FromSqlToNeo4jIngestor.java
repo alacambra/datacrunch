@@ -51,8 +51,6 @@ public class FromSqlToNeo4jIngestor {
 			graphDb.shutdown();
 			System.out.println("finished");
 		}
-		//		test();
-
 	}
 
 	public static void ingestNodes() {
