@@ -20,5 +20,5 @@ if __name__ == "__main__":
 
     activity_dictionary = Dictionary(config_reader, "from_comments", service_provider)
     issue_dictionary = Dictionary(config_reader, "from_issues", service_provider)
-    ActivityCorporaBuilder(config_reader, service_provider, activity_dictionary).generate_dicts()
+    #ActivityCorporaBuilder(config_reader, service_provider, activity_dictionary).generate_dicts()
     IssueCorporaBuilder(config_reader, service_provider, issue_dictionary).generate_dicts()

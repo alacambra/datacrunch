@@ -19,6 +19,8 @@ class Builder:
         self.config_reader = config_reader
         self.service_provider = service_provider
         self.dictionary = dictionary
+        self.services_groups = {}
+        self.load_services_groups()
 
     def generate_dicts(self):
         self.get_words()
@@ -35,7 +37,7 @@ class Builder:
             service_name = service[RedmineServicesProvider.name_col]
             service_id = service[RedmineServicesProvider.id_col]
 
-            if service_name in created_dicts_list:
+            if service_name in created_dicts_list or service_name == "not_used":
                 continue
 
             q = query
@@ -150,6 +152,133 @@ class Builder:
             dict[w[0]] = w[1][:-1]
 
         return dict
+
+    def load_services_groups(self):
+
+        self.services_groups["design"] = "design"
+        self.services_groups["konzeption (inhaltlich)"] = "not_used"
+        self.services_groups["besprechung (intern)"] = "not_used"
+        self.services_groups["projektmanagement"] = "projektmanagement"
+        self.services_groups["testing"] = "testing"
+        self.services_groups["contentpflege"] = "html-_css-umsetzung"
+        self.services_groups["deployment"] = "server administration"
+        self.services_groups["medienerzeugung"] = "design"
+        self.services_groups["recherche"] = "not_used"
+        self.services_groups["schulung (extern)"] = "not_used"
+        self.services_groups["anforderungsmanagement"] = "projektmanagement"
+        self.services_groups["marketing (intern)"] = "not_used"
+        self.services_groups["urlaub"] = "not_used"
+        self.services_groups["sonstiges"] = "not_used"
+        self.services_groups["analyse"] = "not_used"
+        self.services_groups["briefing"] = "projektmanagement"
+        self.services_groups["cms-umsetzung"] = "cms-umsetzung"
+        self.services_groups["consulting"] = "not_used"
+        self.services_groups["controlling und reporting"] = "not_used"
+        self.services_groups["datenbank-umsetzung"] = "not_used"
+        self.services_groups["dokumentation"] = "not_used"
+        self.services_groups["flash-umsetzung"] = "flash-umsetzung"
+        self.services_groups["fortbildung (intern)"] = "not_used"
+        self.services_groups["html-_css-umsetzung"] = "html-_css-umsetzung"
+        self.services_groups["javascript-umsetzung"] = "javascript-umsetzung"
+        self.services_groups["java-umsetzung"] = "java-umsetzung"
+        self.services_groups["key-account-management"] = "key-account-management"
+        self.services_groups["konzeption (technisch)"] = "not_used"
+        self.services_groups["meeting (extern)"] = "not_used"
+        self.services_groups["motion design"] = "not_used"
+        self.services_groups["nebenkosten"] = "not_used"
+        self.services_groups["php-umsetzung"] = "php-umsetzung"
+        self.services_groups["review"] = "not_used"
+        self.services_groups["server administration"] = "server administration"
+        self.services_groups["software-design"] = "not_used"
+        self.services_groups["text und lektorat"] = "not_used"
+        self.services_groups["intern"] = "not_used"
+        self.services_groups["qualitätsmanagement"] = "qualitatsmanagement"
+        self.services_groups["illustration"] = "not_used"
+        self.services_groups["seo_sem"] = "seo_sem"
+        self.services_groups["tracking"] = "not_used"
+
+    def load_services_groups_ids(self):
+
+        self.services_groups_ids["design"] = []
+        self.services_groups_ids["projektmanagement"] = []
+        self.services_groups_ids["html-_css-umsetzung"] = []
+        self.services_groups_ids["server administration"] = []
+        self.services_groups_ids["flash-umsetzung"] = []
+        self.services_groups_ids["javascript-umsetzung"] = []
+        self.services_groups_ids["java-umsetzung"] = []
+        self.services_groups_ids["key-account-management"] = []
+        self.services_groups_ids["php-umsetzung"] = []
+        self.services_groups_ids["server administration"] = []
+        self.services_groups_ids["qualitätsmanagement"] = []
+        self.services_groups_ids["seo_sem"] = []
+        self.services_groups_ids["not_used"] = []
+
+        for service in self.service_provider.get_services_as_tupples():
+
+            service_name = service[0]
+            service_id = service[1]
+            self.services_groups_ids[self.services_groups[service_name]].append(service_id)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -78,9 +78,10 @@ where te1<>te2 and te1<>te3 and te2<>te3 and s1<>s2 and s1<>s3 and s2<>s3
 return s1,s2,s3
 
 start i=node:entities(type="issues")
-match s1<--te1--i, i--te2-->s2, i-->te3-->s3
+match i-[:has_te]-te1-[:service]-s1, i-[:has_te]-te2-->s2, i-[:has_te]->te3-[:service]->s3
 where te1<>te2 and te1<>te3 and te2<>te3 and s1<>s2 and s1<>s3 and s2<>s3
-return s1,s2,s3, count(s1), count(s2), count(s3)
+return s1,s2,s3
+limit 5
 
 start s=node:entities(type="service")
 match s1<--te1--i
@@ -92,17 +93,53 @@ match  i--te3-->s3,
 where te1<>te3 and te2<>te3 and s1<>s3 and s2<>s3
 return s1,s2,s3
 
+start s=node:entities(uid="Urlaub")
+match s<-[:service]-te-[has_te]-i-[:has_te]->te1-[:service]->s2
+where s<>s2
+return s2, count(s) as c
+
 start s=node:entities(type="service")
-match s1<--te1--i
-return s1,te1,i
+match s<-[:service]-te-[has_te]-i-[:has_te]->te1-[:service]->s2
+where s<>s2
+return s, s2, count(s) as c
+order by c
+
+start s=node:entities(type="service"), i=node:entities(type="issues")
+match s<-[:service]-te-[has_te]-i
+with s, i
+match i-[:has_te]->te1-[:service]->s2
+where s<>s2
+with s, i, s2
+match i-[:has_te]->te1-[:service]->s3
+where s<>s2 and s2<>s3 and s2<>s3
+return s, s2, s3, count(s) as c
+order by c
 
 
+start issue=node:entities(type="issues")
+match manager-[:creates]->issue-[:has_te]->te<-[:books]-manager
+where issue.year = 2013
+with issue, manager, te, manager
+match te-[:service]->service
+return manager.uid, manager.login, service, count(manager) as t
+order by manager.login, t
 
 
+start issue=node:entities(type="issues")
+match manager-[:creates]->issue-[:has_te]->te<-[:books]-worker
+where issue.year = 2013 and manager<>worker
+with issue, manager, te, worker
+match te-[:service]->service
+return manager.login, worker.login, service, sum(te.hours) as h, count(manager) as t, manager.uid, worker.uid
+order by manager.login, worker.login, h desc, t desc
 
-
-
-
+start issue=node:entities(type="issues")
+match manager-[:creates]->issue-[:has_te]->te<-[:books]-worker
+where issue.year = 2013 and manager<>worker
+with issue, manager, te, worker
+match te-[:service]->service
+return worker.login, sum(te.hours) as h, count(manager) as t, service, worker.uid
+order by worker.login desc, h desc, t desc
 
 
 

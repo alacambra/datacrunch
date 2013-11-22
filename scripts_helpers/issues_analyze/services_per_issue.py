@@ -73,3 +73,4 @@ for i in range(0, num_services):
         r += str(get_element(i, j)) + "\t"
 
     print r
+w

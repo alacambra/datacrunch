@@ -1,4 +1,7 @@
-start i=node:entities(type="issues")
-match s1<--te1--i, i--te2-->s2, i-->te3-->s3
-where te1<>te2 and te1<>te3 and te2<>te3 and s1<>s2 and s1<>s3 and s2<>s3
-return s1,s2,s3, count(s1), count(s2), count(s3)
+start issue=node:entities(type="issues")
+match manager-[:creates]->issue-[:has_te]->te<-[:books]-worker
+where issue.year = 2013 and manager<>worker
+with issue, manager, te, worker
+match te-[:service]->service
+return manager.login, worker.login, service, sum(te.hours) as h, count(manager) as t, manager.uid, worker.uid
+order by manager.login, worker.login, h desc, t desc
