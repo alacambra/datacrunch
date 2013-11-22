@@ -97,13 +97,16 @@ class Dictionary:
 
         return d
 
-    def generate_dictionary_size_file(self):
+    def generate_dictionary_size_file(self, services_names=None):
+
+        if not services_names:
+            services_names = self.service_provider.get_services_names()
 
         sf = open(self.get_dict_directory() + "dicts_weight.dat", "w+")
 
         lengths = {}
         total_length = 0
-        for service in self.service_provider.get_services_names():
+        for service in services_names:
             file_name = self.get_dict_service_file_name(service)
             if not os.path.isfile(file_name):
                 continue
@@ -116,7 +119,7 @@ class Dictionary:
 
         for service in lengths:
             weight = float(lengths[service]) / float(total_length)*100
-            sf.write(service + "\t" + str(length) + "\t" + str(weight) + "\n")
+            sf.write(service + "\t" + str(lengths[service]) + "\t" + str(weight) + "\n")
 
         sf.close()
 

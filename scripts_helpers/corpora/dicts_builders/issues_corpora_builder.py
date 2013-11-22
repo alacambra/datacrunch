@@ -20,7 +20,9 @@ class Builder:
         self.service_provider = service_provider
         self.dictionary = dictionary
         self.services_groups = {}
+        self.services_groups_ids = {}
         self.load_services_groups()
+        self.load_services_groups_ids()
 
     def generate_dicts(self):
         self.get_words()
@@ -32,10 +34,11 @@ class Builder:
         created_dicts_list = []
         times = self.get_total_services_time()
 
-        for service in self.service_provider.get_services_as_tupples():
+        for service in self.services_groups_ids.items():
 
-            service_name = service[RedmineServicesProvider.name_col]
-            service_id = service[RedmineServicesProvider.id_col]
+            service_name = service[0]
+            #service_id = service[1]
+            ids = service[1]
 
             if service_name in created_dicts_list or service_name == "not_used":
                 continue
@@ -44,12 +47,12 @@ class Builder:
 
             print "analysing for " + service_name + 50*"-"
 
-            ids = [str(i) for i in self.service_provider.get_all_ids_for_service(service_name)]
+            #ids = [str(i) for i in self.service_provider.get_all_ids_for_service(service_name)]
 
             if len(ids) > 1:
-                q += " OR activity_id = ".join(ids)
+                q += " OR activity_id = ".join( [str(i) for i in ids] )
             else:
-                q += str(service_id)
+                q += str(ids[0])
 
             created_dicts_list.append(service_name)
             cursor = helper.db.cursor()
@@ -64,27 +67,30 @@ class Builder:
             for entry in entries:
 
                 #the query view already groups the activity by name and not by id
-                if service_id not in times:
-                    continue
+                for service_id in ids:
+                    if service_id not in times:
+                        continue
 
-                current_score = entry[0] / times[service_id] * 100
+                    current_score = entry[0] / times[service_id] * 100
 
-                subject = entry[1]
-                subject = codecs.decode(subject, "latin1").lower()
-                subject = codecs.encode(subject, "utf8")
+                    subject = entry[1]
+                    subject = codecs.decode(subject, "latin1").lower()
+                    subject = codecs.encode(subject, "utf8")
 
-                for w in subject.split(" "):
-                    if w not in stop_words:
-                        w = WordHelper.clean_word(w)
+                    for w in subject.split(" "):
+                        if w not in stop_words:
+                            w = WordHelper.clean_word(w)
 
-                        if w in to_analyze:
-                            to_analyze[w] += current_score
-                            continue
+                            if w in to_analyze:
+                                to_analyze[w] += current_score
+                                continue
 
-                        if WordHelper.word_is_valid(w):
-                            to_analyze[w] = current_score
+                            if WordHelper.word_is_valid(w):
+                                to_analyze[w] = current_score
 
             self.generate_weight_dictionary(service_name, to_analyze)
+
+        self.dictionary.generate_dictionary_size_file()
 
     def generate_weight_dictionary(self, service, words):
         df = open(self.dictionary.get_dict_service_file_name(service), "w+")
@@ -92,7 +98,7 @@ class Builder:
         for w in words:
             df.write(w + helper.results_field_separator + str(words[w]) + "\n")
 
-        self.dictionary.generate_dictionary_size_file()
+        #self.dictionary.generate_dictionary_size_file()
 
         df.close()
 
@@ -116,8 +122,9 @@ class Builder:
         s = s.lower()
 
         dict_weights = self.dictionary.get_dicts_weight()
+        words = [WordHelper.clean_word(w) for w in s.split(" ") if WordHelper.word_is_valid(w)]
 
-        for service in self.service_provider.get_services_names():
+        for service in self.services_groups_ids:
 
             service_words = self.load_dict(service)
 
@@ -126,7 +133,6 @@ class Builder:
                 continue
 
             dict_weight = dict_weights[service]
-            words = [WordHelper.clean_word(w) for w in s.split(" ") if WordHelper.word_is_valid(w)]
             score = 0
 
             for w in words:
@@ -170,7 +176,7 @@ class Builder:
         self.services_groups["urlaub"] = "not_used"
         self.services_groups["sonstiges"] = "not_used"
         self.services_groups["analyse"] = "not_used"
-        self.services_groups["briefing"] = "projektmanagement"
+        self.services_groups["briefing"] = "not_used"
         self.services_groups["cms-umsetzung"] = "cms-umsetzung"
         self.services_groups["consulting"] = "not_used"
         self.services_groups["controlling und reporting"] = "not_used"
@@ -192,7 +198,7 @@ class Builder:
         self.services_groups["software-design"] = "not_used"
         self.services_groups["text und lektorat"] = "not_used"
         self.services_groups["intern"] = "not_used"
-        self.services_groups["qualitätsmanagement"] = "qualitatsmanagement"
+        self.services_groups["qualitätsmanagement"] = "qualitätsmanagement"
         self.services_groups["illustration"] = "not_used"
         self.services_groups["seo_sem"] = "seo_sem"
         self.services_groups["tracking"] = "not_used"
@@ -200,6 +206,8 @@ class Builder:
     def load_services_groups_ids(self):
 
         self.services_groups_ids["design"] = []
+        self.services_groups_ids["cms-umsetzung"] = []
+        self.services_groups_ids["testing"] = []
         self.services_groups_ids["projektmanagement"] = []
         self.services_groups_ids["html-_css-umsetzung"] = []
         self.services_groups_ids["server administration"] = []

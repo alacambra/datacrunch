@@ -3,5 +3,5 @@ match manager-[:creates]->issue-[:has_te]->te<-[:books]-worker
 where issue.year = 2013 and manager<>worker
 with issue, manager, te, worker
 match te-[:service]->service
-return manager.login, worker.login, service, sum(te.hours) as h, count(manager) as t, manager.uid, worker.uid
-order by manager.login, worker.login, h desc, t desc
+return worker.login, sum(te.hours) as h, count(manager) as t, service, worker.uid
+order by worker.login desc, h desc, t desc
